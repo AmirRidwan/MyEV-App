@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "933044453455",
+    "project_id": "evfinder-ad6f0",
+    "storage_bucket": "evfinder-ad6f0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933044453455:android:588574f9e64d5ca9606a3a",
+        "android_client_info": {
+          "package_name": "com.example.evfinder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyXFlJRDBe3stJQBvAqysjpJ6xjwC4gis"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
