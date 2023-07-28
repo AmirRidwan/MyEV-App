@@ -30,6 +30,23 @@ class _StationRoadmapState extends State<StationRoadmap> {
   void _calculateRoute(String origin, String destination) async {
     if (origin.isEmpty || destination.isEmpty) {
       // Show an error message to the user about empty inputs.
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Location'),
+            content: Text('Please enter location.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
       return;
     }
 
@@ -117,8 +134,6 @@ class _StationRoadmapState extends State<StationRoadmap> {
       print('Error fetching charging station data: $e');
     }
   }
-
-
 
   void _addRoutePolyline(List<LatLng> polylineCoordinates) {
     setState(() {

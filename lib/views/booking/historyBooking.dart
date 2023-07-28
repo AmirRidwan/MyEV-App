@@ -159,7 +159,17 @@ class _historyBookingState extends State<historyBooking> {
           await _fetchChargingStationNames(); // Update charging station names
         },
         child: bookingData.isEmpty
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+          child: Text(
+            'No booking history found',
+            style: SafeGoogleFont(
+              'Lato',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+            ),
+          ),
+        )
             : ListView.builder(
           itemCount: bookingData.length,
           itemBuilder: (context, index) {
