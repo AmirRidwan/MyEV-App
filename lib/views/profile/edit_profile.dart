@@ -7,6 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
+import '../../utils.dart';
+
 class EditProfile extends StatefulWidget {
   @override
   _EditProfileState createState() => _EditProfileState();
@@ -155,11 +157,11 @@ class _EditProfileState extends State<EditProfile> {
         centerTitle: true,
         title: Text(
           "Edit Profile",
-          style: TextStyle(
-            fontFamily: 'Lato',
-            fontSize: 36,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xff2d366f),
+          style: SafeGoogleFont(
+            'Lato',
+            fontSize:  24,
+            fontWeight:  FontWeight.bold,
+            color:  Color(0xff2d366f),
           ),
           textAlign: TextAlign.center,
         ),
@@ -219,42 +221,98 @@ class _EditProfileState extends State<EditProfile> {
               ),
 
               const SizedBox(height: 25),
-              TextFormField(
-                controller: _firstNameController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'First Name',
-                  hintText: 'Enter your first name',
+              Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                child: TextFormField(
+                  controller: _firstNameController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(10)
+                    ),
+                    labelText: 'First Name',
+                    labelStyle: SafeGoogleFont(
+                      'Lato',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                    hintText: 'Enter your first name',
+                  ),
                 ),
               ),
               const SizedBox(height: 25),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Last Name',
-                  hintText: 'Enter your last name',
+              Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                child: TextFormField(
+                  controller: _lastNameController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(10)
+                    ),
+                    labelText: 'Last Name',
+                    labelStyle: SafeGoogleFont(
+                      'Lato',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                    hintText: 'Enter your last name',
+                  ),
                 ),
               ),
               const SizedBox(height: 25),
-              TextFormField(
-                controller: _phoneNumberController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Phone Number',
-                  hintText: 'Enter your phone number',
+              Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                child: TextFormField(
+                  controller: _phoneNumberController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(10)
+                    ),
+                    labelText: 'Phone Number',
+                    labelStyle: SafeGoogleFont(
+                      'Lato',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                    hintText: 'Enter your phone number',
+                  ),
+                  keyboardType: TextInputType.phone,
                 ),
-                keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 25),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Email',
-                  hintText: 'Enter your email',
+              Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                child: TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(10)
+                    ),
+                    labelText: 'Email',
+                    labelStyle: SafeGoogleFont(
+                      'Lato',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                    hintText: 'Enter your email',
+                  ),
+                  keyboardType: TextInputType.emailAddress,
                 ),
-                keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 25),
               Center(

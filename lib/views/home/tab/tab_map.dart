@@ -24,8 +24,8 @@ class _MapPageState extends State<MapPage> {
   LocationData? _currentLocation;
   Set<Marker> _markers = {};
 
-
   BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor markerCarIcon = BitmapDescriptor.defaultMarker;
 
   final TextEditingController _searchController = TextEditingController();
   String _selectedChargerType = '';
@@ -40,6 +40,7 @@ class _MapPageState extends State<MapPage> {
     super.initState();
     _fetchChargingStations();
     addCustomIcon();
+    addCustomCarIcon();
     _getCurrentLocation();
   }
 
@@ -49,15 +50,18 @@ class _MapPageState extends State<MapPage> {
     super.dispose();
   }
 
-
   // Helper function to calculate the distance.
-  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  double _calculateDistance(
+      double lat1, double lon1, double lat2, double lon2) {
     const int earthRadius = 6371; // Radius of the earth in km
     double dLat = _degreesToRadians(lat2 - lat1);
     double dLon = _degreesToRadians(lon2 - lon1);
 
     double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_degreesToRadians(lat1)) * cos(_degreesToRadians(lat2)) * sin(dLon / 2) * sin(dLon / 2);
+        cos(_degreesToRadians(lat1)) *
+            cos(_degreesToRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
     double distance = earthRadius * c;
 
@@ -76,31 +80,36 @@ class _MapPageState extends State<MapPage> {
         .listen((QuerySnapshot snapshot) {
       setState(() {
         _chargingStations = snapshot.docs;
-        _chargingStations.sort((a, b) {
-          double distanceToA = _calculateDistance(
-            _currentLocation!.latitude!,
-            _currentLocation!.longitude!,
-            a['location'].latitude,
-            a['location'].longitude,
-          );
-
-          double distanceToB = _calculateDistance(
-            _currentLocation!.latitude!,
-            _currentLocation!.longitude!,
-            b['location'].latitude,
-            b['location'].longitude,
-          );
-
-          return distanceToA.compareTo(distanceToB);
-        });
-
-        // Call _updateMarkers() after updating _chargingStations
-        _updateMarkers();
+        _sortAndUpdateMarkers();
       });
     });
+
+    // Call _sortAndUpdateMarkers() immediately after setting the subscription
+    _sortAndUpdateMarkers();
   }
 
+  void _sortAndUpdateMarkers() {
+    _chargingStations.sort((a, b) {
+      double distanceToA = _calculateDistance(
+        _currentLocation!.latitude!,
+        _currentLocation!.longitude!,
+        a['location'].latitude,
+        a['location'].longitude,
+      );
 
+      double distanceToB = _calculateDistance(
+        _currentLocation!.latitude!,
+        _currentLocation!.longitude!,
+        b['location'].latitude,
+        b['location'].longitude,
+      );
+
+      return distanceToA.compareTo(distanceToB);
+    });
+
+    // Call _updateMarkers() after updating _chargingStations
+    _updateMarkers();
+  }
 
   Future<void> _getCurrentLocation() async {
     setState(() {
@@ -132,7 +141,8 @@ class _MapPageState extends State<MapPage> {
   void _searchEVChargingLocation() {
     String searchTerm = _searchController.text.toLowerCase().trim();
 
-    List<DocumentSnapshot> filteredStations = _chargingStations.where((station) {
+    List<DocumentSnapshot> filteredStations =
+        _chargingStations.where((station) {
       String address = station['address'].toString().toLowerCase();
       return address.contains(searchTerm);
     }).toList();
@@ -147,7 +157,7 @@ class _MapPageState extends State<MapPage> {
       const ImageConfiguration(),
       "assets/images/marker.png",
     ).then(
-          (icon) {
+      (icon) {
         setState(() {
           markerIcon = icon;
         });
@@ -155,31 +165,50 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  Set<Marker> _filteredMarkers = {}; // Store filtered markers
-  List<DocumentSnapshot> _filteredChargingStations = []; // Store filtered charging stations
-  List<LatLng> _polylineCoordinates = []; // Add this line to declare _polylineCoordinates
+  void addCustomCarIcon() {
+    BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(200, 200)),
+      "assets/images/CarIcon.png",
+    ).then(
+      (icon) {
+        setState(() {
+          markerCarIcon = icon;
+        });
+      },
+    );
+  }
 
+  Set<Marker> _filteredMarkers = {}; // Store filtered markers
+  List<DocumentSnapshot> _filteredChargingStations =
+      []; // Store filtered charging stations
+  List<LatLng> _polylineCoordinates =
+      []; // Add this line to declare _polylineCoordinates
 
   void _updateMarkers() {
-    List<DocumentSnapshot> filteredStations = _chargingStations.where((station) {
+    List<DocumentSnapshot> filteredStations =
+        _chargingStations.where((station) {
       String chargerType = station['chargerType'].toString();
       String chargingSpeed = station['chargingSpeed'].toString();
 
-      bool matchesType = _selectedChargerType.isEmpty || chargerType == _selectedChargerType;
-      bool matchesSpeed = _selectedChargingSpeed.isEmpty || chargingSpeed == _selectedChargingSpeed;
-      bool matchesSearch =
-          _searchController.text.isEmpty || station['address'].toString().toLowerCase().contains(_searchController.text.toLowerCase());
+      bool matchesType =
+          _selectedChargerType.isEmpty || chargerType == _selectedChargerType;
+      bool matchesSpeed = _selectedChargingSpeed.isEmpty ||
+          chargingSpeed == _selectedChargingSpeed;
+      bool matchesSearch = _searchController.text.isEmpty ||
+          station['address']
+              .toString()
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase());
 
       return matchesType && matchesSpeed && matchesSearch;
     }).toList();
 
     setState(() {
       _filteredMarkers = _buildMarkersFromStations(filteredStations);
-      _filteredChargingStations = filteredStations; // Update the filtered charging stations list
+      _filteredChargingStations =
+          filteredStations; // Update the filtered charging stations list
     });
   }
-
-
 
   void _clearFilters() {
     setState(() {
@@ -188,7 +217,6 @@ class _MapPageState extends State<MapPage> {
       _updateMarkers();
     });
   }
-
 
   Set<Marker> _buildMarkersFromStations(List<DocumentSnapshot> stations) {
     Set<Marker> markers = {};
@@ -204,7 +232,7 @@ class _MapPageState extends State<MapPage> {
         infoWindow: InfoWindow(
           title: "You're here",
         ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        icon: markerCarIcon,
       );
       markers.add(userMarker);
     }
@@ -237,26 +265,44 @@ class _MapPageState extends State<MapPage> {
       return;
     }
 
+    // Check if there's an existing polyline on the map and remove it
+    if (_polylines.isNotEmpty) {
+      setState(() {
+        _polylines.clear();
+      });
+    }
+
     // Get the latitude and longitude of the charging station
     double destinationLatitude = station['location'].latitude;
     double destinationLongitude = station['location'].longitude;
 
     // Create the starting and destination coordinates
-    LatLng originLatLng = LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!);
-    LatLng destinationLatLng = LatLng(destinationLatitude, destinationLongitude);
+    LatLng originLatLng =
+        LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!);
+    LatLng destinationLatLng =
+        LatLng(destinationLatitude, destinationLongitude);
 
     // Use the Directions API to get the route information
-    List<LatLng> routeCoordinates = await _getRouteCoordinates(originLatLng, destinationLatLng);
+    List<LatLng> routeCoordinates =
+        await _getRouteCoordinates(originLatLng, destinationLatLng);
 
     // Update the map with the route polyline and adjust the camera bounds
     LatLngBounds bounds = LatLngBounds(
       southwest: LatLng(
-        originLatLng.latitude < destinationLatLng.latitude ? originLatLng.latitude : destinationLatLng.latitude,
-        originLatLng.longitude < destinationLatLng.longitude ? originLatLng.longitude : destinationLatLng.longitude,
+        originLatLng.latitude < destinationLatLng.latitude
+            ? originLatLng.latitude
+            : destinationLatLng.latitude,
+        originLatLng.longitude < destinationLatLng.longitude
+            ? originLatLng.longitude
+            : destinationLatLng.longitude,
       ),
       northeast: LatLng(
-        originLatLng.latitude > destinationLatLng.latitude ? originLatLng.latitude : destinationLatLng.latitude,
-        originLatLng.longitude > destinationLatLng.longitude ? originLatLng.longitude : destinationLatLng.longitude,
+        originLatLng.latitude > destinationLatLng.latitude
+            ? originLatLng.latitude
+            : destinationLatLng.latitude,
+        originLatLng.longitude > destinationLatLng.longitude
+            ? originLatLng.longitude
+            : destinationLatLng.longitude,
       ),
     );
 
@@ -280,8 +326,8 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-
-  Future<List<LatLng>> _getRouteCoordinates(LatLng origin, LatLng destination) async {
+  Future<List<LatLng>> _getRouteCoordinates(
+      LatLng origin, LatLng destination) async {
     // Replace with your own Google Maps API key
     String apiKey = 'AIzaSyAyXFlJRDBe3stJQBvAqysjpJ6xjwC4gis';
 
@@ -299,7 +345,10 @@ class _MapPageState extends State<MapPage> {
       List<dynamic> routes = decodedJson['routes'][0]['legs'][0]['steps'];
       for (var route in routes) {
         String encodedPolyline = route['polyline']['points'];
-        List<LatLng> decodedPolyline = PolylinePoints().decodePolyline(encodedPolyline).map((point) => LatLng(point.latitude, point.longitude)).toList();
+        List<LatLng> decodedPolyline = PolylinePoints()
+            .decodePolyline(encodedPolyline)
+            .map((point) => LatLng(point.latitude, point.longitude))
+            .toList();
         polylineCoordinates.addAll(decodedPolyline);
       }
     }
@@ -307,573 +356,680 @@ class _MapPageState extends State<MapPage> {
     return polylineCoordinates;
   }
 
-  Set<Polyline> _polylines = {}; // Add this line to define the _polylines variable
-
-
-
+  Set<Polyline> _polylines =
+      {}; // Add this line to define the _polylines variable
 
   LatLngBounds _getLatLngBounds(LatLng origin, LatLng destination) {
-    double south = origin.latitude < destination.latitude ? origin.latitude : destination.latitude;
-    double north = origin.latitude > destination.latitude ? origin.latitude : destination.latitude;
-    double west = origin.longitude < destination.longitude ? origin.longitude : destination.longitude;
-    double east = origin.longitude > destination.longitude ? origin.longitude : destination.longitude;
-    return LatLngBounds(northeast: LatLng(north, east), southwest: LatLng(south, west));
+    double south = origin.latitude < destination.latitude
+        ? origin.latitude
+        : destination.latitude;
+    double north = origin.latitude > destination.latitude
+        ? origin.latitude
+        : destination.latitude;
+    double west = origin.longitude < destination.longitude
+        ? origin.longitude
+        : destination.longitude;
+    double east = origin.longitude > destination.longitude
+        ? origin.longitude
+        : destination.longitude;
+    return LatLngBounds(
+        northeast: LatLng(north, east), southwest: LatLng(south, west));
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            GoogleMap(
-              zoomControlsEnabled: false,
-              myLocationEnabled: true,
-              mapType: MapType.normal,
-              mapToolbarEnabled: false,
-              polylines: _polylines,
-              initialCameraPosition: _currentLocation != null
-                  ? CameraPosition(
-                target: LatLng(
-                  _currentLocation!.latitude!,
-                  _currentLocation!.longitude!,
-                ),
-                zoom: 14.0,
-              )
-                  : CameraPosition(
-                target: LatLng(3.1663819611475787, 101.53690995000055), // Fallback position if current location is null
-                zoom: 14.0,
-              ),
-              markers: _filteredMarkers,
-              onMapCreated: (GoogleMapController controller) {
-                _mapController = controller;
-              },
-            ),
-
-            Positioned(
-              top: 16.0,
-              left: 16.0,
-              right: 16.0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24.0),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 16,
-                          color: Colors.black54,
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Stack(
+            children: [
+              GoogleMap(
+                zoomControlsEnabled: false,
+                myLocationEnabled: false,
+                mapType: MapType.normal,
+                mapToolbarEnabled: false,
+                polylines: _polylines,
+                initialCameraPosition: _currentLocation != null
+                    ? CameraPosition(
+                        target: LatLng(
+                          _currentLocation!.latitude!,
+                          _currentLocation!.longitude!,
                         ),
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search by address',
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                          border: InputBorder.none,
-                        ),
+                        zoom: 14.0,
+                      )
+                    : CameraPosition(
+                        target: LatLng(3.1663819611475787, 101.53690995000055),
+                        // Fallback position if current location is null
+                        zoom: 14.0,
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.search),
-                      onPressed: _searchEVChargingLocation,
-                    ),
-                  ],
-                ),
+                markers: _filteredMarkers,
+                onMapCreated: (GoogleMapController controller) {
+                  _mapController = controller;
+                },
               ),
-            ),
-            Positioned(
-              top: 80.0,
-              left: 16.0,
-              right: 16.0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              Positioned(
+                top: 16.0,
+                left: 16.0,
+                right: 16.0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24.0),
+                  ),
                   child: Row(
                     children: [
                       Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedChargerType,
+                        child: TextField(
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 16,
+                            color: Colors.black54,
+                          ),
+                          controller: _searchController,
                           decoration: InputDecoration(
+                            hintText: 'Search by address',
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 16.0),
                             border: InputBorder.none,
                           ),
-                          onChanged: (String? value) {
-                            if (value == '') {
-                              // Clear the filter
-                              _clearFilters();
-                            } else {
-                              setState(() {
-                                _selectedChargerType = value ?? '';
-                                _updateMarkers();
-                              });
-                            }
-                          },
-                          items: [
-                            DropdownMenuItem<String>(
-                              value: '',
-                              child: Text(
-                                  'All Charger Types',
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'Type 1',
-                              child: Text(
-                                  'Type 1',
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'Type 2',
-                              child: Text(
-                                  'Type 2',
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'DC Fast Charging',
-                              child: Text(
-                                  'DC Fast Charging',
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
-                      SizedBox(width: 8.0),
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedChargingSpeed,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                          ),
-                          onChanged: (String? value) {
-                            if (value == '') {
-                              // Clear the filter
-                              _clearFilters();
-                            } else {
-                              setState(() {
-                                _selectedChargingSpeed = value ?? '';
-                                _updateMarkers();
-                              });
-                            }
-                          },
-                          items: [
-                            DropdownMenuItem<String>(
-                              value: '',
-                              child: Text(
-                                  'All Charging Speeds',
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'Slow',
-                              child: Text(
-                                  'Slow',
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'Medium',
-                              child: Text(
-                                  'Medium',
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'Fast',
-                              child: Text(
-                                  'Fast',
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      IconButton(
+                        icon: Icon(Icons.search),
+                        onPressed: _searchEVChargingLocation,
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: 150.0,
-              right: 15.0,
-              child: FloatingActionButton(
-                backgroundColor: buttonColor,
-                onPressed: _isLoadingLocation ? null : _getCurrentLocation,
-                child: _isLoadingLocation
-                    ? const CircularProgressIndicator()
-                    : const Icon(Icons.my_location),
-              ),
-            ),
-
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                height: 150.0,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _filteredChargingStations.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    DocumentSnapshot station = _chargingStations[index];
-                    bool availability = station['availability'];
-                    String chargerType = station['chargerType'];
-                    String chargingSpeed = station['chargingSpeed'];
-
-                    // Calculate the distance to the charging station
-                    double distanceToStation = _calculateDistance(
-                      _currentLocation!.latitude!,
-                      _currentLocation!.longitude!,
-                      station['location'].latitude,
-                      station['location'].longitude,
-                    );
-
-                    return GestureDetector(
-                      onTap: () {
-                        _mapController.animateCamera(
-                          CameraUpdate.newLatLng(
-                            LatLng(
-                              station['location'].latitude,
-                              station['location'].longitude,
+              Positioned(
+                top: 80.0,
+                left: 16.0,
+                right: 16.0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedChargerType,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
                             ),
-                          ),
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          width: 240.0, // Adjust the width here
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16.0),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  station['name'].toString(),
+                            onChanged: (String? value) {
+                              if (value == '') {
+                                // Clear the filter
+                                _clearFilters();
+                              } else {
+                                setState(() {
+                                  _selectedChargerType = value ?? '';
+                                  _updateMarkers();
+                                });
+                              }
+                            },
+                            items: [
+                              DropdownMenuItem<String>(
+                                value: '',
+                                child: Text(
+                                  'All Charger Types',
                                   style: SafeGoogleFont(
                                     'Lato',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                     color: Colors.black,
                                   ),
                                 ),
-                                // Display the distance information
-                                Text(
-                                  'Distances: ${distanceToStation.toStringAsFixed(2)} km',
+                              ),
+                              DropdownMenuItem<String>(
+                                value: 'Type 1',
+                                child: Text(
+                                  'Type 1',
                                   style: SafeGoogleFont(
                                     'Lato',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
+                                    fontSize: 16,
+                                    color: Colors.black,
                                   ),
                                 ),
-                                SizedBox(height: 10.0),
-                                availability
-                                    ? Text(
-                                  'Available',
+                              ),
+                              DropdownMenuItem<String>(
+                                value: 'Type 2',
+                                child: Text(
+                                  'Type 2',
                                   style: SafeGoogleFont(
                                     'Lato',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green,
-                                  ),
-                                )
-                                    : Text(
-                                  'Not Available',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.red,
+                                    fontSize: 16,
+                                    color: Colors.black,
                                   ),
                                 ),
-                                SizedBox(height: 12),
-                                Row(
+                              ),
+                              DropdownMenuItem<String>(
+                                value: 'DC Fast Charging',
+                                child: Text(
+                                  'DC Fast Charging',
+                                  style: SafeGoogleFont(
+                                    'Lato',
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 8.0),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedChargingSpeed,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                            ),
+                            onChanged: (String? value) {
+                              if (value == '') {
+                                // Clear the filter
+                                _clearFilters();
+                              } else {
+                                setState(() {
+                                  _selectedChargingSpeed = value ?? '';
+                                  _updateMarkers();
+                                });
+                              }
+                            },
+                            items: [
+                              DropdownMenuItem<String>(
+                                value: '',
+                                child: Text(
+                                  'All Charging Speeds',
+                                  style: SafeGoogleFont(
+                                    'Lato',
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                              DropdownMenuItem<String>(
+                                value: 'Slow',
+                                child: Text(
+                                  'Slow',
+                                  style: SafeGoogleFont(
+                                    'Lato',
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                              DropdownMenuItem<String>(
+                                value: 'Medium',
+                                child: Text(
+                                  'Medium',
+                                  style: SafeGoogleFont(
+                                    'Lato',
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                              DropdownMenuItem<String>(
+                                value: 'Fast',
+                                child: Text(
+                                  'Fast',
+                                  style: SafeGoogleFont(
+                                    'Lato',
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 150.0,
+                right: 15.0,
+                child: FloatingActionButton(
+                  backgroundColor: buttonColor,
+                  onPressed: _isLoadingLocation ? null : _getCurrentLocation,
+                  child: _isLoadingLocation
+                      ? const CircularProgressIndicator()
+                      : const Icon(Icons.my_location),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 150.0,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _filteredChargingStations.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      DocumentSnapshot station = _chargingStations[index];
+                      bool availability = station['availability'];
+                      String chargerType = station['chargerType'];
+                      String chargingSpeed = station['chargingSpeed'];
+
+                      // Calculate the distance to the charging station
+                      double distanceToStation = _calculateDistance(
+                        _currentLocation!.latitude!,
+                        _currentLocation!.longitude!,
+                        station['location'].latitude,
+                        station['location'].longitude,
+                      );
+
+                      return GestureDetector(
+                        onTap: () {
+                          _mapController.animateCamera(
+                            CameraUpdate.newLatLng(
+                              LatLng(
+                                station['location'].latitude,
+                                station['location'].longitude,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Material(
+                            elevation: 4,
+                            borderRadius: BorderRadius.circular(16.0),
+                            child: Container(
+                              width: 240.0, // Adjust the width here
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16.0),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      flex: 2,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          primary: buttonColor,
-                                          onPrimary: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                                        ),
-                                        onPressed: () {
-                                          showModalBottomSheet(
-                                            enableDrag: true,
-                                            isDismissible: true,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.vertical(
-                                                top: Radius.circular(25.0),
-                                              ),
+                                    Text(
+                                      station['name'].toString(),
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    // Display the distance information
+                                    Text(
+                                      'Distances: ${distanceToStation.toStringAsFixed(2)} km',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    SizedBox(height: 10.0),
+                                    availability
+                                        ? Text(
+                                            'Available',
+                                            style: SafeGoogleFont(
+                                              'Lato',
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.green,
                                             ),
-                                            context: context,
-                                            isScrollControlled: true,
-                                            builder: (BuildContext context) {
-                                              return Container(
-                                                padding: EdgeInsets.all(16.0),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Center(
-                                                      child: Text(
-                                                        station['name'].toString(),
-                                                        style: SafeGoogleFont(
-                                                          'Lato',
-                                                          fontSize: 18,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 10.0),
-                                                    //Map view with markers
-                                                    SizedBox(
-                                                      height: 200,
-                                                      child: GoogleMap(
-                                                        initialCameraPosition: CameraPosition(
-                                                          target: LatLng(
-                                                            station['location'].latitude,
-                                                            station['location'].longitude,
-                                                          ),
-                                                          zoom: 16,
-                                                        ),
-                                                        zoomControlsEnabled: false,
-                                                        markers: Set<Marker>.from([
-                                                          Marker(
-                                                            markerId: MarkerId('chargingStation'),
-                                                            position: LatLng(
-                                                              station['location'].latitude,
-                                                              station['location'].longitude,
-                                                            ),
-                                                            infoWindow: InfoWindow(
-                                                              title: station['name'].toString(),
-                                                              snippet: station['address'].toString(),
-                                                            ),
-                                                            icon: markerIcon,
-                                                          ),
-                                                        ]),
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 8.0),
-                                                    Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                          )
+                                        : Text(
+                                            'Not Available',
+                                            style: SafeGoogleFont(
+                                              'Lato',
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                    SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 2,
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              primary: buttonColor,
+                                              onPrimary: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 8, horizontal: 16),
+                                            ),
+                                            onPressed: () {
+                                              showModalBottomSheet(
+                                                enableDrag: true,
+                                                isDismissible: true,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.vertical(
+                                                    top: Radius.circular(25.0),
+                                                  ),
+                                                ),
+                                                context: context,
+                                                isScrollControlled: true,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return Container(
+                                                    padding:
+                                                        EdgeInsets.all(16.0),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
                                                       children: [
-                                                        Row(
-                                                          children: [
-                                                            Text(
-                                                              'Address:',
-                                                              style: TextStyle(
-                                                                fontFamily: 'Lato',
-                                                                fontSize: 16,
-                                                                color: Colors.black54,
-                                                                fontWeight: FontWeight.bold,
-                                                              ),
+                                                        Center(
+                                                          child: Text(
+                                                            station['name']
+                                                                .toString(),
+                                                            style:
+                                                                SafeGoogleFont(
+                                                              'Lato',
+                                                              fontSize: 18,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color:
+                                                                  Colors.black,
                                                             ),
-                                                            SizedBox(width: 4.0),
-                                                            Expanded(
-                                                              child: Text(
-                                                                '${station['address'].toString()}',
-                                                                style: TextStyle(
-                                                                  fontFamily: 'Lato',
-                                                                  fontSize: 16,
-                                                                  color: Colors.black54,
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 10.0),
+                                                        //Map view with markers
+                                                        SizedBox(
+                                                          height: 200,
+                                                          child: GoogleMap(
+                                                            initialCameraPosition:
+                                                                CameraPosition(
+                                                              target: LatLng(
+                                                                station['location']
+                                                                    .latitude,
+                                                                station['location']
+                                                                    .longitude,
+                                                              ),
+                                                              zoom: 16,
+                                                            ),
+                                                            zoomControlsEnabled:
+                                                                false,
+                                                            markers: Set<
+                                                                Marker>.from([
+                                                              Marker(
+                                                                markerId: MarkerId(
+                                                                    'chargingStation'),
+                                                                position:
+                                                                    LatLng(
+                                                                  station['location']
+                                                                      .latitude,
+                                                                  station['location']
+                                                                      .longitude,
                                                                 ),
-                                                                softWrap: true, // Allow the address to wrap to a new line
+                                                                infoWindow:
+                                                                    InfoWindow(
+                                                                  title: station[
+                                                                          'name']
+                                                                      .toString(),
+                                                                  snippet: station[
+                                                                          'address']
+                                                                      .toString(),
+                                                                ),
+                                                                icon:
+                                                                    markerIcon,
                                                               ),
+                                                            ]),
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 8.0),
+                                                        Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'Address:',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontFamily:
+                                                                        'Lato',
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .black54,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                    width: 4.0),
+                                                                Expanded(
+                                                                  child: Text(
+                                                                    '${station['address'].toString()}',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontFamily:
+                                                                          'Lato',
+                                                                      fontSize:
+                                                                          16,
+                                                                      color: Colors
+                                                                          .black54,
+                                                                    ),
+                                                                    softWrap:
+                                                                        true, // Allow the address to wrap to a new line
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(
+                                                                height: 8.0),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'Charger Type:',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontFamily:
+                                                                        'Lato',
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .black54,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                    width: 4.0),
+                                                                Text(
+                                                                  '$chargerType',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontFamily:
+                                                                        'Lato',
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .black54,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(
+                                                                height: 8.0),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'Charging Speed:',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontFamily:
+                                                                        'Lato',
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .black54,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                    width: 4.0),
+                                                                Text(
+                                                                  '$chargingSpeed',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontFamily:
+                                                                        'Lato',
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .black54,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(
+                                                                height: 8.0),
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                  'Operation Hour:',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontFamily:
+                                                                        'Lato',
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .black54,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                    width: 4.0),
+                                                                Text(
+                                                                  '${station['operationHour'].toString()}',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontFamily:
+                                                                        'Lato',
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                        .black54,
+                                                                  ),
+                                                                ),
+                                                              ],
                                                             ),
                                                           ],
                                                         ),
-                                                        SizedBox(height: 8.0),
-                                                        Row(
-                                                          children: [
-                                                            Text(
-                                                              'Charger Type:',
-                                                              style: TextStyle(
-                                                                fontFamily: 'Lato',
-                                                                fontSize: 16,
-                                                                color: Colors.black54,
-                                                                fontWeight: FontWeight.bold,
-                                                              ),
-                                                            ),
-                                                            SizedBox(width: 4.0),
-                                                            Text(
-                                                              '$chargerType',
-                                                              style: TextStyle(
-                                                                fontFamily: 'Lato',
-                                                                fontSize: 16,
-                                                                color: Colors.black54,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        SizedBox(height: 8.0),
-                                                        Row(
-                                                          children: [
-                                                            Text(
-                                                              'Charging Speed:',
-                                                              style: TextStyle(
-                                                                fontFamily: 'Lato',
-                                                                fontSize: 16,
-                                                                color: Colors.black54,
-                                                                fontWeight: FontWeight.bold,
-                                                              ),
-                                                            ),
-                                                            SizedBox(width: 4.0),
-                                                            Text(
-                                                              '$chargingSpeed',
-                                                              style: TextStyle(
-                                                                fontFamily: 'Lato',
-                                                                fontSize: 16,
-                                                                color: Colors.black54,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        SizedBox(height: 8.0),
-                                                        Row(
-                                                          children: [
-                                                            Text(
-                                                              'Operation Hour:',
-                                                              style: TextStyle(
-                                                                fontFamily: 'Lato',
-                                                                fontSize: 16,
-                                                                color: Colors.black54,
-                                                                fontWeight: FontWeight.bold,
-                                                              ),
-                                                            ),
-                                                            SizedBox(width: 4.0),
-                                                            Text(
-                                                              '${station['operationHour'].toString()}',
-                                                              style: TextStyle(
-                                                                fontFamily: 'Lato',
-                                                                fontSize: 16,
-                                                                color: Colors.black54,
-                                                              ),
-                                                            ),
-                                                          ],
+
+                                                        SizedBox(height: 16.0),
+                                                        Center(
+                                                          child: getButton(
+                                                            context,
+                                                            buttonColor,
+                                                            "Book Slot",
+                                                            Colors.white,
+                                                            () {
+                                                              Navigator.push(
+                                                                  context,
+                                                                  MaterialPageRoute(builder:
+                                                                      (BuildContext
+                                                                          context) {
+                                                                return BookingPage(
+                                                                    stationId:
+                                                                        station[
+                                                                            'stationId']);
+                                                              }));
+                                                            },
+                                                            18,
+                                                            weight:
+                                                                FontWeight.w700,
+                                                            buttonHeight:
+                                                                FetchPixels
+                                                                    .getPixelHeight(
+                                                                        44),
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                    FetchPixels
+                                                                        .getPixelHeight(
+                                                                            12)),
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
-
-                                                    SizedBox(height: 16.0),
-                                                    Center(
-                                                      child: getButton(
-                                                        context,
-                                                        buttonColor,
-                                                        "Book Slot",
-                                                        Colors.white,
-                                                            () {
-                                                              Navigator.push(context, MaterialPageRoute(
-                                                                  builder: (BuildContext context){
-                                                                    return BookingPage(stationId: station['stationId']);
-                                                                  }
-                                                              )
-                                                              );
-                                                            },
-                                                        18,
-                                                        weight: FontWeight.w700,
-                                                        buttonHeight: FetchPixels.getPixelHeight(44),
-                                                        borderRadius: BorderRadius.circular(FetchPixels.getPixelHeight(12)),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
+                                                  );
+                                                },
                                               );
                                             },
-                                          );
-                                        },
-                                        child: Text(
-                                          'VIEW DETAILS',
-                                          style: SafeGoogleFont(
-                                            'Lato',
-                                            fontSize: 12,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
+                                            child: Text(
+                                              'VIEW DETAILS',
+                                              style: SafeGoogleFont(
+                                                'Lato',
+                                                fontSize: 12,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
                                           ),
-                                          textAlign: TextAlign.center,
                                         ),
-                                      ),
-                                    ),
-                                    SizedBox(width: 10),
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          primary: buttonColor,
-                                          onPrimary: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(14),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              primary: buttonColor,
+                                              onPrimary: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                              ),
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 8, horizontal: 16),
+                                            ),
+                                            onPressed: () {
+                                              _showRouteToChargingStation(
+                                                  station);
+                                            },
+                                            child: Icon(Icons.directions),
                                           ),
-                                          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                                         ),
-                                        onPressed: () {
-                                          _showRouteToChargingStation(station);
-                                        },
-                                        child: Icon(Icons.directions),
-                                      ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

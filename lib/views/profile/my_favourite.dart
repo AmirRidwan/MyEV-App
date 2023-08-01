@@ -247,7 +247,7 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
             "My Favourite",
             style: SafeGoogleFont(
               'Lato',
-              fontSize:  36,
+              fontSize:  24,
               fontWeight:  FontWeight.bold,
               color:  Color(0xff2d366f),
             ),

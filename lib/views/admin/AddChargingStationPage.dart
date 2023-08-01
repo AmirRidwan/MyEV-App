@@ -23,8 +23,30 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
   List<String> _chargerTypes = ['Type 1', 'Type 2', 'DC Fast Charging'];
   List<String> _chargingSpeeds = ['Slow', 'Medium', 'Fast'];
   List<String> _operationHours = [
-    '1 AM', '2 AM','3 AM', '4 AM', '5 AM', '6 AM','7 AM','8 AM','9 AM', '10 AM', '11 AM', '12 PM',
-    '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM','8 PM','9 PM', '10 PM', '11 PM', '12 AM',
+    '1 AM',
+    '2 AM',
+    '3 AM',
+    '4 AM',
+    '5 AM',
+    '6 AM',
+    '7 AM',
+    '8 AM',
+    '9 AM',
+    '10 AM',
+    '11 AM',
+    '12 PM',
+    '1 PM',
+    '2 PM',
+    '3 PM',
+    '4 PM',
+    '5 PM',
+    '6 PM',
+    '7 PM',
+    '8 PM',
+    '9 PM',
+    '10 PM',
+    '11 PM',
+    '12 AM',
   ];
 
   List<DropdownMenuItem<String>> _buildDropdownMenuItems(List<String> items) {
@@ -51,7 +73,8 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
     String operationHour = _openingTime! + ' - ' + _closingTime!;
 
     try {
-      DocumentReference docRef = await FirebaseFirestore.instance.collection('charging_stations').add({
+      DocumentReference docRef =
+          await FirebaseFirestore.instance.collection('charging_stations').add({
         'name': name,
         'address': address,
         'location': location,
@@ -104,22 +127,21 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
           "Add Charging Station",
           style: SafeGoogleFont(
             'Lato',
-            fontSize:  24,
-            fontWeight:  FontWeight.bold,
-            color:  Color(0xff2d366f),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xff2d366f),
           ),
           textAlign: TextAlign.center,
         ),
         backgroundColor: Color(0xff9dd1ea),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
         child: SingleChildScrollView(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16.0),
-              border: Border.all(color: Colors.grey),
-            ),
+          child: Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
             child: Padding(
               padding: EdgeInsets.all(16.0),
               child: Form(
@@ -130,6 +152,11 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                       controller: _nameController,
                       decoration: InputDecoration(
                         labelText: 'Name',
+                        labelStyle: SafeGoogleFont(
+                          'Lato',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                         prefixIcon: Icon(Icons.person),
                       ),
                       validator: (value) {
@@ -144,6 +171,11 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                       controller: _addressController,
                       decoration: InputDecoration(
                         labelText: 'Address',
+                        labelStyle: SafeGoogleFont(
+                          'Lato',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                         prefixIcon: Icon(Icons.location_on),
                       ),
                       validator: (value) {
@@ -161,6 +193,11 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                             controller: _latitudeController,
                             decoration: InputDecoration(
                               labelText: 'Latitude',
+                              labelStyle: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
                               prefixIcon: Icon(Icons.map),
                             ),
                             keyboardType: TextInputType.number,
@@ -178,6 +215,11 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                             controller: _longitudeController,
                             decoration: InputDecoration(
                               labelText: 'Longitude',
+                              labelStyle: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
                               prefixIcon: Icon(Icons.map),
                             ),
                             keyboardType: TextInputType.number,
@@ -206,12 +248,24 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                       value: _chargerType,
                       decoration: InputDecoration(
                         labelText: 'Charger Type',
+                        labelStyle: SafeGoogleFont(
+                          'Lato',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                         prefixIcon: Icon(Icons.ev_station),
                       ),
                       items: [
                         DropdownMenuItem<String>(
                           value: null,
-                          child: Text('Select a charger type'),
+                          child: Text(
+                            'Select a charger type',
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
                         ..._buildDropdownMenuItems(_chargerTypes),
                       ],
@@ -226,12 +280,24 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                       value: _chargingSpeed,
                       decoration: InputDecoration(
                         labelText: 'Charging Speed',
+                        labelStyle: SafeGoogleFont(
+                          'Lato',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                         prefixIcon: Icon(Icons.flash_on),
                       ),
                       items: [
                         DropdownMenuItem<String>(
                           value: null,
-                          child: Text('Select a charging speed'),
+                          child: Text(
+                            'Select a charging speed',
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
                         ..._buildDropdownMenuItems(_chargingSpeeds),
                       ],
@@ -246,12 +312,24 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                       value: _openingTime,
                       decoration: InputDecoration(
                         labelText: 'Opening Time',
+                        labelStyle: SafeGoogleFont(
+                          'Lato',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                         prefixIcon: Icon(Icons.access_time),
                       ),
                       items: [
                         DropdownMenuItem<String>(
                           value: null,
-                          child: Text('Select opening time'),
+                          child: Text(
+                            'Select opening time',
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
                         ..._buildDropdownMenuItems(_operationHours),
                       ],
@@ -266,12 +344,24 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                       value: _closingTime,
                       decoration: InputDecoration(
                         labelText: 'Closing Time',
+                        labelStyle: SafeGoogleFont(
+                          'Lato',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                         prefixIcon: Icon(Icons.access_time),
                       ),
                       items: [
                         DropdownMenuItem<String>(
                           value: null,
-                          child: Text('Select closing time'),
+                          child: Text(
+                            'Select closing time',
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 16,
+                              color: Colors.grey,
+                            ),
+                          ),
                         ),
                         ..._buildDropdownMenuItems(_operationHours),
                       ],
@@ -286,6 +376,11 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                       controller: _chargingRateController,
                       decoration: InputDecoration(
                         labelText: 'Charging Rate (per hour)',
+                        labelStyle: SafeGoogleFont(
+                          'Lato',
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
                         prefixIcon: Icon(Icons.attach_money),
                       ),
                       keyboardType: TextInputType.number,
@@ -303,12 +398,12 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                       ),
                       onPressed: _addChargingStation,
                       child: Text(
-                          'Add Charging Station',
+                        'Add Charging Station',
                         style: SafeGoogleFont(
                           'Lato',
-                          fontSize:  16,
-                          fontWeight:  FontWeight.bold,
-                          color:  Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ),

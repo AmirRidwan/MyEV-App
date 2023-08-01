@@ -14,7 +14,8 @@ class LoginPage extends StatefulWidget {
   final bool showRegisterPage;
   final VoidCallback toggleScreens;
 
-  const LoginPage({Key? key, required this.showRegisterPage, required this.toggleScreens})
+  const LoginPage(
+      {Key? key, required this.showRegisterPage, required this.toggleScreens})
       : super(key: key);
 
   @override
@@ -22,7 +23,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   // text controller
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -36,17 +36,20 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login(BuildContext context) async {
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
-      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('users')
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
           .doc(userCredential.user!.uid)
           .get();
 
       if (userSnapshot.exists) {
-        Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
+        Map<String, dynamic> userData =
+            userSnapshot.data() as Map<String, dynamic>;
         String role = userData['role'];
 
         if (role == 'user') {
@@ -98,70 +101,124 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: const Color(0xffe2e2e2),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // logo
-                Container(
-                  height:  300,
-                  width: 300,
-                  child: const Image(
-                    image: AssetImage('assets/images/myev-logo.png'),
-                  ),
-                ),
-                // welcome back, you've been missed!
-                Center(
-                  child: Text(
-                    'LOGIN',
-                    style: SafeGoogleFont(
-                      'Lato',
-                      fontSize:  24,
-                      fontWeight:  FontWeight.w700,
-                      color:  Color(0xbf000000),
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Center(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // logo
+                  Container(
+                    height: 300,
+                    width: 300,
+                    child: const Image(
+                      image: AssetImage('assets/images/myev-logo.png'),
                     ),
                   ),
-                ),
+                  // welcome back, you've been missed!
+                  Center(
+                    child: Text(
+                      'LOGIN',
+                      style: SafeGoogleFont(
+                        'Lato',
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xbf000000),
+                      ),
+                    ),
+                  ),
 
-                const SizedBox(height: 25),
+                  const SizedBox(height: 25),
 
-                // email textfield
-                MyTextField(
-                  controller: _emailController,
-                  hintText: 'Email',
-                  obscureText: false,
-                ),
+                  // email textfield
+                  MyTextField(
+                    controller: _emailController,
+                    hintText: 'Email',
+                    obscureText: false,
+                  ),
 
-                const SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-                // password textfield
-                MyPassTextField(
-                  controller: _passwordController,
-                  hintText: 'Password',
-                  obscureText: true,
-                ),
+                  // password textfield
+                  MyPassTextField(
+                    controller: _passwordController,
+                    hintText: 'Password',
+                    obscureText: true,
+                  ),
 
-                const SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-                // forgot password?
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                  // forgot password?
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return ForgotPasswordPage();
+                                },
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Forget Password?',
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.lightBlue,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  // sign in button
+                  MyButton(
+                    text: "LOGIN",
+                    onTap: () async => await _login(context),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  // not a member? register now
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Text(
+                        'Not a member?',
+                        style: SafeGoogleFont(
+                          'Lato',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute
-                              (builder: (context) {
-                              return ForgotPasswordPage();
-                            },
-                            ),
+                            MaterialPageRoute(builder: (context) {
+                              return RegisterPage(
+                                showRegisterPage: true,
+                                toggleScreens: widget.toggleScreens,
+                              );
+                            }),
                           );
                         },
-                        child: Text('Forget Password?',
+                        child: Text(
+                          'Register now',
                           style: SafeGoogleFont(
                             'Lato',
                             fontSize: 16,
@@ -172,58 +229,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ],
                   ),
-                ),
-
-                const SizedBox(height: 25),
-
-                // sign in button
-                MyButton(
-                  text: "LOGIN",
-                  onTap: () async => await _login(context),
-                ),
-
-                const SizedBox(height: 25),
-
-                // not a member? register now
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Not a member?',
-                      style: SafeGoogleFont(
-                        'Lato',
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) {
-                            return RegisterPage(
-                              showRegisterPage: true,
-                              toggleScreens: widget.toggleScreens,
-                            );
-                          }),
-                        );
-                      },
-                      child: Text(
-                        'Register now',
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.lightBlue,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 50),
-              ],
+                  const SizedBox(height: 50),
+                ],
+              ),
             ),
           ),
         ),

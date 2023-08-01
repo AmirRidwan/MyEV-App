@@ -35,17 +35,16 @@ class _BookingPageState extends State<BookingPage> {
   int selectedHours = 1;
   TextEditingController _dateController = TextEditingController();
 
-
 // The currently selected payment method
   PaymentMethod? _selectedPaymentMethod;
-
 
   void updateSelectedHours(double value) {
     setState(() {
       selectedHours = value.round();
       int startHour = int.parse(selectedStartTime.split(':')[0]);
       int endHour = startHour + selectedHours;
-      selectedEndTime = '${endHour.toString().padLeft(2, '0')}:00 ${endHour >= 12 ? 'PM' : 'AM'}';
+      selectedEndTime =
+          '${endHour.toString().padLeft(2, '0')}:00 ${endHour >= 12 ? 'PM' : 'AM'}';
     });
   }
 
@@ -70,10 +69,13 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   // Update the booking status in Firestore
-  Future<void> _updateBookingStatus(BuildContext context, Booking booking, String status) async {
+  Future<void> _updateBookingStatus(
+      BuildContext context, Booking booking, String status) async {
     try {
       // Get the reference to the booking document
-      DocumentReference bookingRef = FirebaseFirestore.instance.collection('bookings').doc(booking.bookingId);
+      DocumentReference bookingRef = FirebaseFirestore.instance
+          .collection('bookings')
+          .doc(booking.bookingId);
 
       // Update the booking status in Firestore
       await bookingRef.update({'bookingStatus': status});
@@ -90,7 +92,8 @@ class _BookingPageState extends State<BookingPage> {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    Navigator.pop(context); // Navigate back to the ChargingStationDetailsPage
+                    Navigator.pop(
+                        context); // Navigate back to the ChargingStationDetailsPage
                   },
                   child: Text('OK'),
                 ),
@@ -126,7 +129,8 @@ class _BookingPageState extends State<BookingPage> {
         builder: (context) {
           return AlertDialog(
             title: Text('Error'),
-            content: Text('There was an error while processing your booking. Please try again.'),
+            content: Text(
+                'There was an error while processing your booking. Please try again.'),
             actions: [
               ElevatedButton(
                 onPressed: () {
@@ -142,7 +146,8 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   // Simulate payment completion (Replace this with your actual payment processing logic)
-  Future<bool?> _simulatePaymentCompletion(BuildContext context, Booking booking) async {
+  Future<bool?> _simulatePaymentCompletion(
+      BuildContext context, Booking booking) async {
     return await showDialog<bool?>(
       context: context,
       builder: (context) {
@@ -154,7 +159,8 @@ class _BookingPageState extends State<BookingPage> {
             children: [
               Text('Booking ID: ${booking.bookingId}'),
               SizedBox(height: 8),
-              Text('Selected Date: ${booking.selectedDate.toString().split(' ')[0]}'),
+              Text(
+                  'Selected Date: ${booking.selectedDate.toString().split(' ')[0]}'),
               SizedBox(height: 8),
               Text('Start Time: ${booking.startTime}'),
               SizedBox(height: 8),
@@ -190,10 +196,11 @@ class _BookingPageState extends State<BookingPage> {
 
   Future<double> _getChargingRate() async {
     // Fetch charging rate for the selected station from Firestore
-    DocumentSnapshot<Map<String, dynamic>> stationSnapshot = await FirebaseFirestore.instance
-        .collection('charging_stations')
-        .doc(widget.stationId)
-        .get();
+    DocumentSnapshot<Map<String, dynamic>> stationSnapshot =
+        await FirebaseFirestore.instance
+            .collection('charging_stations')
+            .doc(widget.stationId)
+            .get();
 
     if (!stationSnapshot.exists) {
       // Handle the case where the charging station does not exist in the database
@@ -259,6 +266,61 @@ class _BookingPageState extends State<BookingPage> {
       return;
     }
 
+    // Fetch the charging station availability from Firestore
+    DocumentSnapshot<Map<String, dynamic>> stationSnapshot =
+    await FirebaseFirestore.instance
+        .collection('charging_stations')
+        .doc(widget.stationId)
+        .get();
+
+    if (!stationSnapshot.exists) {
+      // Handle the case where the charging station does not exist in the database
+      print('Charging station not found.');
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('The charging station does not exist in the database.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
+    // Check if the charging station is available for booking
+    bool chargingStationAvailable = stationSnapshot.data()?['availability'] ?? false;
+
+    if (!chargingStationAvailable) {
+      // Show dialog if charging station is not available
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Charging Station Not Available'),
+            content: Text('The charging station is currently not available for booking.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
     // Calculate the total amount based on charging rate and hours of charge
     double chargingRate = await _getChargingRate();
     double totalAmount = chargingRate * selectedHours;
@@ -276,18 +338,22 @@ class _BookingPageState extends State<BookingPage> {
       totalAmount: totalAmount,
       bookingTimestamp: Timestamp.now(),
       bookingStatus: 'Unpaid',
-      selectedDate: selectedDate, // Include the selectedDate in the Booking object
+      selectedDate:
+          selectedDate, // Include the selectedDate in the Booking object
     );
 
     // Store the booking details in Firestore
-    DocumentReference bookingRef = await FirebaseFirestore.instance.collection('bookings').add(booking.toMap());
+    DocumentReference bookingRef = await FirebaseFirestore.instance
+        .collection('bookings')
+        .add(booking.toMap());
 
     // Update the bookingId with the newly generated ID from Firestore
     String newBookingId = bookingRef.id;
     booking = booking.copyWith(bookingId: newBookingId);
 
     // Simulate the payment completion and show the booking details
-    bool? paymentSuccessful = await _simulatePaymentCompletion(context, booking);
+    bool? paymentSuccessful =
+        await _simulatePaymentCompletion(context, booking);
 
     if (paymentSuccessful == true) {
       // Payment was successful, update the booking status to 'Paid'
@@ -302,7 +368,10 @@ class _BookingPageState extends State<BookingPage> {
   Future<String?> _getChargingStationName(String stationId) async {
     try {
       DocumentSnapshot<Map<String, dynamic>> stationSnapshot =
-      await FirebaseFirestore.instance.collection('charging_stations').doc(stationId).get();
+          await FirebaseFirestore.instance
+              .collection('charging_stations')
+              .doc(stationId)
+              .get();
 
       if (stationSnapshot.exists) {
         return stationSnapshot.data()?['name'];
@@ -352,13 +421,15 @@ class _BookingPageState extends State<BookingPage> {
       context: context,
       initialDate: now,
       firstDate: now,
-      lastDate: DateTime(now.year + 1), // Allow picking dates up to 1 year from the current date
+      lastDate: DateTime(now.year +
+          1), // Allow picking dates up to 1 year from the current date
     );
 
     // Update the selected date in the text field
     if (pickedDate != null && pickedDate != now) {
       setState(() {
-        _dateController.text = pickedDate.toString().split(' ')[0]; // Display the selected date in the format YYYY-MM-DD
+        _dateController.text = pickedDate.toString().split(
+            ' ')[0]; // Display the selected date in the format YYYY-MM-DD
       });
     }
   }
@@ -378,8 +449,10 @@ class _BookingPageState extends State<BookingPage> {
       inactiveColor: Color(0xff9dd1ea),
       value: selectedHours.toDouble(),
       min: 1,
-      max: _maxHours.toDouble(), // Adjust the max value to increase the range
-      divisions: _maxHours - 1, // Increase the number of divisions
+      max: _maxHours.toDouble(),
+      // Adjust the max value to increase the range
+      divisions: _maxHours - 1,
+      // Increase the number of divisions
       onChanged: (double value) {
         updateSelectedHours(value);
       },
@@ -389,7 +462,6 @@ class _BookingPageState extends State<BookingPage> {
 
   @override
   Widget build(BuildContext context) {
-
     // Radio button widget for each payment method
     Widget _buildPaymentMethodRadio(PaymentMethod paymentMethod) {
       return RadioListTile(
@@ -397,17 +469,17 @@ class _BookingPageState extends State<BookingPage> {
           paymentMethod.name,
           style: SafeGoogleFont(
             'Lato',
-            fontSize:  18,
-            fontWeight:  FontWeight.bold,
-            color:  Colors.black, // Change text color to black
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.black, // Change text color to black
           ),
         ),
         subtitle: Text(
           paymentMethod.description,
           style: SafeGoogleFont(
             'Lato',
-            fontSize:  14,
-            color:  Colors.black54, // Change text color to black
+            fontSize: 14,
+            color: Colors.black54, // Change text color to black
           ),
         ),
         value: paymentMethod,
@@ -424,7 +496,8 @@ class _BookingPageState extends State<BookingPage> {
       appBar: AppBar(
         elevation: 2.0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Color(0xff2d366f)), // Change icon color to black
+          icon: Icon(Icons.arrow_back_ios, color: Color(0xff2d366f)),
+          // Change icon color to black
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: true,
@@ -432,9 +505,9 @@ class _BookingPageState extends State<BookingPage> {
           "Booking Slot",
           style: SafeGoogleFont(
             'Lato',
-            fontSize:  24,
-            fontWeight:  FontWeight.bold,
-            color:  Color(0xff2d366f), // Change text color to black
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xff2d366f), // Change text color to black
           ),
           textAlign: TextAlign.center,
         ),
@@ -450,11 +523,13 @@ class _BookingPageState extends State<BookingPage> {
                 future: _getChargingStationName(widget.stationId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: Text('Loading...',
+                    return Center(
+                        child: Text(
+                      'Loading...',
                       style: SafeGoogleFont(
                         'Lato',
-                        fontSize:  16,
-                        color:  Colors.black, // Change text color to black
+                        fontSize: 16,
+                        color: Colors.black, // Change text color to black
                       ),
                     ));
                   } else if (snapshot.hasData && snapshot.data != null) {
@@ -463,18 +538,20 @@ class _BookingPageState extends State<BookingPage> {
                         '${snapshot.data}',
                         style: SafeGoogleFont(
                           'Lato',
-                          fontSize:  20,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color:  Colors.black, // Change text color to black
+                          color: Colors.black, // Change text color to black
                         ),
                       ),
                     );
                   } else {
-                    return Center(child: Text('Charging Station Name Not Found',
+                    return Center(
+                        child: Text(
+                      'Charging Station Name Not Found',
                       style: SafeGoogleFont(
                         'Lato',
-                        fontSize:  16,
-                        color:  Colors.black, // Change text color to black
+                        fontSize: 16,
+                        color: Colors.black, // Change text color to black
                       ),
                     ));
                   }
@@ -488,11 +565,12 @@ class _BookingPageState extends State<BookingPage> {
                   labelText: 'Select Date:',
                   labelStyle: SafeGoogleFont(
                     'Lato',
-                    fontSize:  14,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color:  Colors.black54,
+                    color: Colors.black54,
                   ),
-                  suffixIcon: Icon(Icons.calendar_today, color: Colors.black), // Change icon color to black
+                  suffixIcon: Icon(Icons.calendar_today,
+                      color: Colors.black), // Change icon color to black
                 ),
                 onTap: () {
                   // Show the date picker dialog when the text field is tapped
@@ -504,9 +582,9 @@ class _BookingPageState extends State<BookingPage> {
                 'Select Start Time:',
                 style: SafeGoogleFont(
                   'Lato',
-                  fontSize:  16,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color:  Colors.black, // Change text color to black
+                  color: Colors.black, // Change text color to black
                 ),
               ),
               SizedBox(height: 8),
@@ -517,17 +595,19 @@ class _BookingPageState extends State<BookingPage> {
                     selectedStartTime = newValue!;
                     int startHour = int.parse(selectedStartTime.split(':')[0]);
                     int endHour = startHour + selectedHours;
-                    selectedEndTime = '${endHour.toString().padLeft(2, '0')}:00 ${endHour >= 12 ? 'PM' : 'AM'}';
+                    selectedEndTime =
+                        '${endHour.toString().padLeft(2, '0')}:00 ${endHour >= 12 ? 'PM' : 'AM'}';
                   });
                 },
                 items: timeSlots.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
-                    child: Text(value,
+                    child: Text(
+                      value,
                       style: SafeGoogleFont(
                         'Lato',
-                        fontSize:  16,
-                        color:  Colors.black, // Change text color to black
+                        fontSize: 16,
+                        color: Colors.black, // Change text color to black
                       ),
                     ),
                   );
@@ -538,9 +618,9 @@ class _BookingPageState extends State<BookingPage> {
                 'Select Hours of Charge:',
                 style: SafeGoogleFont(
                   'Lato',
-                  fontSize:  16,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color:  Colors.black,
+                  color: Colors.black,
                 ),
               ),
               _buildHourSlider(),
@@ -551,17 +631,18 @@ class _BookingPageState extends State<BookingPage> {
                     'End Time:',
                     style: SafeGoogleFont(
                       'Lato',
-                      fontSize:  16,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color:  Colors.black, // Change text color to black
+                      color: Colors.black, // Change text color to black
                     ),
                   ),
                   SizedBox(width: 10),
-                  Text('$selectedEndTime',
+                  Text(
+                    '$selectedEndTime',
                     style: SafeGoogleFont(
                       'Lato',
-                      fontSize:  16,
-                      color:  Colors.black, // Change text color to black
+                      fontSize: 16,
+                      color: Colors.black, // Change text color to black
                     ),
                   ),
                 ],
@@ -571,9 +652,9 @@ class _BookingPageState extends State<BookingPage> {
                 'Choose Payment Method:',
                 style: SafeGoogleFont(
                   'Lato',
-                  fontSize:  16,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color:  Colors.black,
+                  color: Colors.black,
                 ),
               ),
               // radio button for each payment method
@@ -591,12 +672,13 @@ class _BookingPageState extends State<BookingPage> {
                   onPressed: () {
                     _handlePayment();
                   },
-                  child: Text('Confirm Booking',
+                  child: Text(
+                    'Confirm Booking',
                     style: SafeGoogleFont(
                       'Lato',
-                      fontSize:  18,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color:  Colors.white,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -607,8 +689,4 @@ class _BookingPageState extends State<BookingPage> {
       ),
     );
   }
-
-
-
-
 }

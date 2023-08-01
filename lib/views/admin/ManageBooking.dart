@@ -9,7 +9,6 @@ class ManageBooking extends StatefulWidget {
 }
 
 class _ManageBookingState extends State<ManageBooking> {
-
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
@@ -22,16 +21,18 @@ class _ManageBookingState extends State<ManageBooking> {
 
   Future<void> _fetchBookingData() async {
     try {
-      QuerySnapshot<Map<String, dynamic>> snapshot = await firestore
-          .collection('bookings')
-          .get();
+      QuerySnapshot<Map<String, dynamic>> snapshot =
+          await firestore.collection('bookings').get();
       if (snapshot.docs.isNotEmpty) {
         setState(() {
           bookingData = snapshot.docs.map((doc) {
             final data = doc.data()! as Map<String, dynamic>;
             data['bookingId'] = doc.id; // Assign the document ID to 'bookingId'
-            data['bookingDateTime'] = (data['bookingTimestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
-            data['selectedDate'] = (data['selectedDate'] as Timestamp?)?.toDate();
+            data['bookingDateTime'] =
+                (data['bookingTimestamp'] as Timestamp?)?.toDate() ??
+                    DateTime.now();
+            data['selectedDate'] =
+                (data['selectedDate'] as Timestamp?)?.toDate();
             return data;
           }).toList();
         });
@@ -80,7 +81,12 @@ class _ManageBookingState extends State<ManageBooking> {
     final List<String> bookingStatusOptions = ['Paid', 'Unpaid'];
 
     // Dropdown options for Payment Method
-    final List<String> paymentMethodOptions = ['PayPal', 'Credit Card', 'E-Wallet'];
+    final List<String> paymentMethodOptions = [
+      'PayPal',
+      'Credit Card',
+      'Google Pay',
+      'E-Wallet'
+    ];
 
     showModalBottomSheet(
       context: context,
@@ -99,12 +105,12 @@ class _ManageBookingState extends State<ManageBooking> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                    "Edit Details",
+                  "Edit Details",
                   style: SafeGoogleFont(
                     'Lato',
-                    fontSize:  24,
-                    fontWeight:  FontWeight.bold,
-                    color:  Colors.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
                 ),
                 // Edit Booking Status
@@ -190,7 +196,8 @@ class _ManageBookingState extends State<ManageBooking> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context); // Close the bottom sheet without saving changes
+                        Navigator.pop(
+                            context); // Close the bottom sheet without saving changes
                       },
                       child: Text('Cancel'),
                     ),
@@ -199,16 +206,23 @@ class _ManageBookingState extends State<ManageBooking> {
                         // Save the edited details back to Firestore
                         try {
                           String bookingId = booking['bookingId'];
-                          await firestore.collection('bookings').doc(bookingId).update({
+                          await firestore
+                              .collection('bookings')
+                              .doc(bookingId)
+                              .update({
                             'bookingStatus': statusController.text,
                             'endTime': endTimeController.text,
-                            'hoursOfCharge': double.parse(hoursOfChargeController.text),
+                            'hoursOfCharge':
+                                double.parse(hoursOfChargeController.text),
                             'paymentMethod': paymentMethodController.text,
-                            'selectedDate': DateTime.parse(selectedDateController.text),
+                            'selectedDate':
+                                DateTime.parse(selectedDateController.text),
                             'startTime': startTimeController.text,
-                            'totalAmount': double.parse(totalAmountController.text),
+                            'totalAmount':
+                                double.parse(totalAmountController.text),
                           });
-                          Navigator.pop(context); // Close the bottom sheet after saving changes
+                          Navigator.pop(
+                              context); // Close the bottom sheet after saving changes
                           _fetchBookingData(); // Refresh the booking data to reflect the changes
                         } catch (e) {
                           print('Error updating booking details: $e');
@@ -227,9 +241,6 @@ class _ManageBookingState extends State<ManageBooking> {
     );
   }
 
-
-
-
   String _searchQuery = ''; // Variable to store the user's search query
 
   @override
@@ -246,9 +257,9 @@ class _ManageBookingState extends State<ManageBooking> {
           "Manage Booking",
           style: SafeGoogleFont(
             'Lato',
-            fontSize:  24,
-            fontWeight:  FontWeight.bold,
-            color:  Color(0xff2d366f),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xff2d366f),
           ),
           textAlign: TextAlign.center,
         ),
@@ -256,42 +267,49 @@ class _ManageBookingState extends State<ManageBooking> {
       ),
       body: Column(
         children: [
+          SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: TextField(
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                  borderSide: BorderSide.none,
+            padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 5.0),
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(25),
+              child: TextField(
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : Icon(Icons.search),
                 ),
-                filled: true,
-                fillColor: Colors.white,
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                  icon: Icon(Icons.clear),
-                  onPressed: () {
-                    setState(() {
-                      _searchQuery = '';
-                    });
-                  },
-                )
-                    : Icon(Icons.search),
               ),
             ),
           ),
+          SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
               itemCount: bookingData.length,
               itemBuilder: (context, index) {
                 Map<String, dynamic> booking = bookingData[index];
                 // Check if the search query matches any relevant field
-                bool matchesSearchQuery = booking['bookingId'].contains(_searchQuery) ||
+                bool matchesSearchQuery = booking['bookingId']
+                        .contains(_searchQuery) ||
                     booking['selectedDate'].toString().contains(_searchQuery) ||
                     booking['bookingStatus'].contains(_searchQuery) ||
                     booking['paymentMethod'].contains(_searchQuery);
@@ -301,52 +319,53 @@ class _ManageBookingState extends State<ManageBooking> {
                 }
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: ListTile(
-                    shape: RoundedRectangleBorder( //<-- SEE HERE
-                      side: BorderSide(width: 1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    title: Text(
+                  padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 5.0),
+                  child: Material(
+                    color: Colors.white,
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(10),
+                    child: ListTile(
+                      title: Text(
                         'Booking ID: ${booking['bookingId']}',
-                      style: SafeGoogleFont(
-                        'Lato',
-                        fontSize:  16,
-                        fontWeight:  FontWeight.bold,
-                        color:  Colors.black,
+                        style: SafeGoogleFont(
+                          'Lato',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                    subtitle: Column(
-                      children: [
-                        Text(
+                      subtitle: Column(
+                        children: [
+                          Text(
                             'Date: ${booking['selectedDate']}',
-                          style: SafeGoogleFont(
-                            'Lato',
-                            fontSize:  14,
-                            color:  Colors.black54,
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Date: ${booking['bookingStatus']}',
-                          style: SafeGoogleFont(
-                            'Lato',
-                            fontSize:  14,
-                            color:  Colors.black54,
+                          Text(
+                            'Date: ${booking['bookingStatus']}',
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 14,
+                              color: Colors.black54,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () {
-                        _editBookingDetails(booking);
-                      },
-                    ),
-                    leading: IconButton(
-                      icon: Icon(Icons.cancel),
-                      onPressed: () {
-                        _cancelBooking(booking);
-                      },
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () {
+                          _editBookingDetails(booking);
+                        },
+                      ),
+                      leading: IconButton(
+                        icon: Icon(Icons.cancel),
+                        onPressed: () {
+                          _cancelBooking(booking);
+                        },
+                      ),
                     ),
                   ),
                 );

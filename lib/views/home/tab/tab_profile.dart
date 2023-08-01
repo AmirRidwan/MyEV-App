@@ -1,6 +1,5 @@
 import 'package:evfinder/utils.dart';
 import 'package:evfinder/views/profile/my_booking.dart';
-import 'package:evfinder/views/profile/my_car.dart';
 import 'package:evfinder/views/profile/my_profile.dart';
 import 'package:evfinder/views/profile/my_favourite.dart';
 import 'package:evfinder/views/profile/settings.dart';
@@ -118,35 +117,38 @@ class _TabProfileState extends State<TabProfile> {
           //My profile
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (BuildContext context){
-                      return MyProfile();
-                    }
-                )
-                );
-              },
-              child: Container(
-                height: 60,
-                width: 356,
-                decoration: BoxDecoration(
-                  border: Border.all(
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(10),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (BuildContext context){
+                        return MyProfile();
+                      }
+                  )
+                  );
+                },
+                child: Container(
+                  height: 60,
+                  width: 356,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.white,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
-                ),
-                child: Row(
-                  children: <Widget>[
-                    Image.asset(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(width: 20),
+                      Image.asset(
                         "assets/images/user.png",
-                      width: 45,
-                      height: 45,
-                    ),
-                    SizedBox(width: 20),
-                    Center(
-                      child: Text(
+                        width: 45,
+                        height: 45,
+                      ),
+                      SizedBox(width: 20),
+                      Text(
                         "My Profile",
                         style: SafeGoogleFont(
                           'Lato',
@@ -154,9 +156,9 @@ class _TabProfileState extends State<TabProfile> {
                           fontWeight:  FontWeight.bold,
                           color:  Colors.black,
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -165,35 +167,38 @@ class _TabProfileState extends State<TabProfile> {
           //My Favourite
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (BuildContext context){
-                      return const Favourite();
-                    }
-                )
-                );
-              },
-              child: Container(
-                height: 60,
-                width: 356,
-                decoration: BoxDecoration(
-                  border: Border.all(
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(10),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (BuildContext context){
+                        return Favourite();
+                      }
+                  )
+                  );
+                },
+                child: Container(
+                  height: 60,
+                  width: 356,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.white,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
-                ),
-                child: Row(
-                  children: <Widget>[
-                    Image.asset(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(width: 20),
+                      Image.asset(
                         "assets/images/bookmark.png",
-                      width: 45,
-                      height: 45,
-                    ),
-                    SizedBox(width: 20),
-                    Center(
-                      child: Text(
+                        width: 45,
+                        height: 45,
+                      ),
+                      SizedBox(width: 20),
+                      Text(
                         "My Favourite",
                         style: SafeGoogleFont(
                           'Lato',
@@ -201,9 +206,9 @@ class _TabProfileState extends State<TabProfile> {
                           fontWeight:  FontWeight.bold,
                           color:  Colors.black,
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -212,35 +217,38 @@ class _TabProfileState extends State<TabProfile> {
           //My booking
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (BuildContext context){
-                      return MyBooking(currentUserId: user!.uid);
-                    }
-                )
-                );
-              },
-              child: Container(
-                height: 60,
-                width: 356,
-                decoration: BoxDecoration(
-                  border: Border.all(
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(10),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (BuildContext context){
+                        return MyBooking(currentUserId: user!.uid);
+                      }
+                  )
+                  );
+                },
+                child: Container(
+                  height: 60,
+                  width: 356,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.white,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
-                ),
-                child: Row(
-                  children: <Widget>[
-                    Image.asset(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(width: 20),
+                      Image.asset(
                         "assets/images/booking.png",
-                      width: 45,
-                      height: 45,
-                    ),
-                    SizedBox(width: 20),
-                    Center(
-                      child: Text(
+                        width: 45,
+                        height: 45,
+                      ),
+                      SizedBox(width: 20),
+                      Text(
                         "My Booking",
                         style: SafeGoogleFont(
                           'Lato',
@@ -248,9 +256,9 @@ class _TabProfileState extends State<TabProfile> {
                           fontWeight:  FontWeight.bold,
                           color:  Colors.black,
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -259,35 +267,38 @@ class _TabProfileState extends State<TabProfile> {
           //Setting
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (BuildContext context){
-                      return const SettingPage();
-                    }
-                    )
-                );
-              },
-              child: Container(
-                height: 60,
-                width: 356,
-                decoration: BoxDecoration(
-                  border: Border.all(
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(10),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (BuildContext context){
+                        return SettingPage();
+                      }
+                  )
+                  );
+                },
+                child: Container(
+                  height: 60,
+                  width: 356,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.white,
+                    ),
+                    borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
-                ),
-                child: Row(
-                  children: <Widget>[
-                    Image.asset(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(width: 20),
+                      Image.asset(
                         "assets/images/settings.png",
-                      width: 45,
-                      height: 45,
-                    ),
-                    SizedBox(width: 20),
-                    Center(
-                      child: Text(
+                        width: 45,
+                        height: 45,
+                      ),
+                      SizedBox(width: 20),
+                      Text(
                         "Setting",
                         style: SafeGoogleFont(
                           'Lato',
@@ -295,9 +306,9 @@ class _TabProfileState extends State<TabProfile> {
                           fontWeight:  FontWeight.bold,
                           color:  Colors.black,
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),

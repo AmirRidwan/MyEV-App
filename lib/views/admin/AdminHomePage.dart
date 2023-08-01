@@ -44,8 +44,12 @@ class AdminHomePage extends StatelessWidget {
             Container(
               child: Center(
                 child: StreamBuilder<DocumentSnapshot>(
-                  stream: FirebaseFirestore.instance.collection('users').doc(user!.uid).snapshots(),
-                  builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user!.uid)
+                      .snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<DocumentSnapshot> snapshot) {
                     if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
                     }
@@ -58,17 +62,19 @@ class AdminHomePage extends StatelessWidget {
                       return Text('No data available for the current user.');
                     }
 
-                    Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+                    Map<String, dynamic> data =
+                        snapshot.data!.data() as Map<String, dynamic>;
 
                     return Column(
                       children: [
                         SizedBox(height: 10),
                         Text(
                           'Welcome, ${data['firstName']} ${data['lastName']}!',
-                          style: SafeGoogleFont('Lato',
-                            fontSize:  18,
-                            fontWeight:  FontWeight.bold,
-                            color:  Colors.black,
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
                         ),
                       ],
@@ -130,7 +136,8 @@ class AdminHomePage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AddChargingStationPage()),
+                    MaterialPageRoute(
+                        builder: (context) => AddChargingStationPage()),
                   );
                 },
                 icon: Icon(Icons.ev_station),
@@ -160,13 +167,15 @@ class AdminHomePage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ChargingStationPage()),
+                    MaterialPageRoute(
+                        builder: (context) => ChargingStationPage()),
                   );
                   // Handle booking management
                   // Add your logic here
                 },
                 icon: Icon(Icons.flash_on),
-                label: Text('Manage EV Charging Stations Details & Availability'),
+                label:
+                    Text('Manage EV Charging Stations Details & Availability'),
               ),
             ),
             SizedBox(height: 20),

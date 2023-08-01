@@ -494,7 +494,7 @@ class _ListOfChargingStationsState extends State<ListOfChargingStations> {
           "List of Charging Stations",
           style: SafeGoogleFont(
             'Lato',
-            fontSize:  24,
+            fontSize:  20,
             fontWeight:  FontWeight.bold,
             color:  Color(0xff2d366f),
           ),
@@ -507,45 +507,58 @@ class _ListOfChargingStationsState extends State<ListOfChargingStations> {
           builder: (BuildContext context, BoxConstraints constraints) {
             return Column(
               children: [
-                Container(
-                  height: 80,
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
-                    ),
-                    color: Color(0xff9dd1ea),
+                Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
                   ),
-                  child: Column(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16.0),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _searchController,
-                                decoration: InputDecoration(
-                                  hintText: 'Search by address',
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.search),
-                              onPressed: _searchEVChargingLocation,
-                            ),
-                          ],
-                        ),
+                  color: Colors.white,
+                  child: Container(
+                    height: 80,
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
                       ),
-                      SizedBox(height: 12),
-                    ],
+                      color: Color(0xff9dd1ea),
+                    ),
+                    child: Column(
+                      children: [
+                        Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(24),
+                          color: Colors.white,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(24.0),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _searchController,
+                                    decoration: InputDecoration(
+                                      hintText: 'Search by address',
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                                      border: InputBorder.none,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.search),
+                                  onPressed: _searchEVChargingLocation,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                      ],
+                    ),
                   ),
                 ),
                 Expanded(
@@ -580,47 +593,53 @@ class _ListOfChargingStationsState extends State<ListOfChargingStations> {
                                 ),
                               );
                             },
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              width: 190,
-                              margin: EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 5.0),                              child: Material(
+                                elevation: 4,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.grey, width: 2),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    chargingStation.name,
-                                    style: SafeGoogleFont(
-                                      'Lato',
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    )
+                                color: Colors.white,
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  width: 190,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.white, width: 2),
                                   ),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    chargingStation.address,
-                                    style: SafeGoogleFont(
-                                      'Lato',
-                                      fontSize: 12,
-                                      color: Colors.black54,
-                                    )
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        chargingStation.name,
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        )
+                                      ),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        chargingStation.address,
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 12,
+                                          color: Colors.black54,
+                                        )
+                                      ),
+                                      SizedBox(height: 5), // Add some spacing between address and distance
+                                      Text(
+                                        'Distance: ${userLocation != null ? '$distance km' : 'N/A'}', // Display the distance or 'N/A' if userLocation is null
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black54,
+                                        )
+                                      ),
+                                    ],
                                   ),
-                                  SizedBox(height: 5), // Add some spacing between address and distance
-                                  Text(
-                                    'Distance: ${userLocation != null ? '$distance km' : 'N/A'}', // Display the distance or 'N/A' if userLocation is null
-                                    style: SafeGoogleFont(
-                                      'Lato',
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black54,
-                                    )
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           );

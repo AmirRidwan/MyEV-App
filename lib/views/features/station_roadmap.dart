@@ -6,6 +6,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 
+import '../../utils.dart';
+
 class StationRoadmap extends StatefulWidget {
   @override
   _StationRoadmapState createState() => _StationRoadmapState();
@@ -185,7 +187,23 @@ class _StationRoadmapState extends State<StationRoadmap> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('EV Charging Station Roadmap'),
+        elevation: 0.0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Color(0xff2d366f)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        centerTitle: true,
+        title: Text(
+          "EV Charging Station Roadmap",
+          style: SafeGoogleFont(
+            'Lato',
+            fontSize:  20,
+            fontWeight:  FontWeight.bold,
+            color:  Color(0xff2d366f),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        backgroundColor: Color(0xff9dd1ea),
       ),
       body: Column(
         children: [

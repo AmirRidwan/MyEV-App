@@ -24,7 +24,7 @@ class _SettingPageState extends State<SettingPage> {
           "Setting",
           style: SafeGoogleFont(
             'Lato',
-            fontSize:  36,
+            fontSize:  24,
             fontWeight:  FontWeight.bold,
             color:  Color(0xff2d366f),
           ),
@@ -36,11 +36,11 @@ class _SettingPageState extends State<SettingPage> {
       body: ListView(
         children: [
           SizedBox(height: 10),
-          //My profile
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: Material(
-              elevation: 4, // Add elevation here
+              elevation: 4,
               borderRadius: BorderRadius.circular(10),
               child: GestureDetector(
                 onTap: () {
@@ -77,8 +77,7 @@ class _SettingPageState extends State<SettingPage> {
             ),
           ),
 
-          //Saved Slots
-          //Saved Slots
+          //Terms & Conditions
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: Material(
@@ -121,7 +120,7 @@ class _SettingPageState extends State<SettingPage> {
             ),
           ),
 
-          //My booking
+          //Privacy & Policy
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: Material(
@@ -164,7 +163,7 @@ class _SettingPageState extends State<SettingPage> {
             ),
           ),
 
-          //Setting
+          //About Us
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             child: Material(

@@ -5,7 +5,6 @@ import '../../../base/color_data.dart';
 import '../../../base/constant.dart';
 import '../../../base/resizer/fetch_pixels.dart';
 import '../../../base/widget_utils.dart';
-import '../../../models/model_ongoing.dart';
 import '../../../utils.dart';
 import '../../booking/paidBooking.dart';
 import '../../booking/historyBooking.dart';
@@ -25,6 +24,7 @@ class _TabBookingState extends State<TabBooking>
   var select = 0;
 
   onItemChanged(String value) {
+    // Implement the item change logic here
   }
 
   final PageController _controller = PageController(
@@ -37,7 +37,6 @@ class _TabBookingState extends State<TabBooking>
   @override
   void initState() {
     tabController = TabController(length: 3, vsync: this);
-    setState(() {});
     super.initState();
   }
 
@@ -74,57 +73,68 @@ class _TabBookingState extends State<TabBooking>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffFFC95B),
       body: Column(
         children: [
-          getVerSpace(FetchPixels.getPixelHeight(10)),
-          getVerSpace(FetchPixels.getPixelHeight(16)),
-          Positioned(
-            top: 16.0,
-            left: 16.0,
-            right: 16.0,
-            child: Container(
-              width: 380,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14.0),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      style: SafeGoogleFont(
-                        'Lato',
-                        fontSize: 16,
-                        color: Colors.black54,
-                      ),
-                      controller: searchController,
-                      decoration: InputDecoration(
-                        hintText: 'Search',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                        border: InputBorder.none,
-                      ),
+          Material(
+            elevation: 4,
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(16),
+              bottomRight: Radius.circular(16),
+            ),
+            color: Color(0xffFFC95B),
+            child: Column(
+              children: [
+                SizedBox(height: 20),
+                Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(14.0),
+                  color: Colors.white,
+                  child: Container(
+                    width: 380,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14.0),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                            controller: searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Search',
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 16.0),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.search),
+                          onPressed: () {},
+                        ),
+                      ],
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(Icons.search),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
+                ),
+                SizedBox(height: 10),
+                tabBar(),
+                SizedBox(height: 10),
+              ],
             ),
           ),
-          getVerSpace(FetchPixels.getPixelHeight(20)),
-          tabBar(),
-          pageView()
+          pageView(),
         ],
       ),
     );
   }
 
-  Expanded pageView() {
+  Widget pageView() {
     return Expanded(
-      flex: 1,
       child: PageView(
         controller: _controller,
         scrollDirection: Axis.horizontal,
@@ -137,8 +147,11 @@ class _TabBookingState extends State<TabBooking>
           setState(() {
             position = value;
             if (position == 0) {
+              // Handle page change for unpaidBooking
             } else if (position == 1) {
+              // Handle page change for paidBooking
             } else {
+              // Handle page change for historyBooking
             }
           });
           tabController.animateTo(value);
@@ -150,85 +163,109 @@ class _TabBookingState extends State<TabBooking>
   Widget tabBar() {
     return getPaddingWidget(
       EdgeInsets.symmetric(horizontal: horSpace),
-      Container(
-        height: FetchPixels.getPixelHeight(56),
-        decoration: BoxDecoration(
+      Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        child: Container(
+          height: FetchPixels.getPixelHeight(56),
+          decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                  color: containerShadow,
-                  blurRadius: 33,
-                  offset: const Offset(0, 7))
+                color: containerShadow,
+                blurRadius: 33,
+                offset: const Offset(0, 7),
+              ),
             ],
-            borderRadius:
-            BorderRadius.circular(FetchPixels.getPixelHeight(12))),
-        child: TabBar(
-          indicatorColor: Colors.white,
-          onTap: (index) {
-            _controller.animateToPage(
-              index,
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOut,
-            );
-            setState(() {
-              position = index;
-              if (position == 0) {
-              } else if (position == 1) {
-              } else {
-              }
-            });
-          },
-          tabs: [
-            Tab(
-              child: Container(
-                decoration: position == 0
-                    ? BoxDecoration(
-                    color: slotbg,
-                    borderRadius: BorderRadius.circular(
-                        FetchPixels.getPixelHeight(12)))
-                    : null,
-                height: FetchPixels.getPixelHeight(40),
-                width: FetchPixels.getPixelHeight(108),
-                alignment: Alignment.center,
-                child: getCustomFont(
-                    "Unpaid", 18, position == 0 ? buttonColor : subtext, 1,
-                    fontWeight: FontWeight.bold, fontFamily: 'Lato'),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: TabBar(
+            indicatorColor: Colors.transparent,
+            onTap: (index) {
+              _controller.animateToPage(
+                index,
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
+              );
+              setState(() {
+                position = index;
+                if (position == 0) {
+                  // Handle tab change for unpaidBooking
+                } else if (position == 1) {
+                  // Handle tab change for paidBooking
+                } else {
+                  // Handle tab change for historyBooking
+                }
+              });
+            },
+            tabs: [
+              Tab(
+                child: Container(
+                  decoration: position == 0
+                      ? BoxDecoration(
+                          color: slotbg,
+                          borderRadius: BorderRadius.circular(16),
+                        )
+                      : null,
+                  height: FetchPixels.getPixelHeight(40),
+                  width: FetchPixels.getPixelHeight(108),
+                  alignment: Alignment.center,
+                  child: getCustomFont(
+                    "Unpaid",
+                    18,
+                    position == 0 ? buttonColor : subtext,
+                    1,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Lato',
+                  ),
+                ),
               ),
-            ),
-            Tab(
-              child: Container(
-                decoration: position == 1
-                    ? BoxDecoration(
-                    color: slotbg,
-                    borderRadius: BorderRadius.circular(
-                        FetchPixels.getPixelHeight(12)))
-                    : null,
-                height: FetchPixels.getPixelHeight(40),
-                width: FetchPixels.getPixelHeight(108),
-                alignment: Alignment.center,
-                child: getCustomFont(
-                    "Paid", 18, position == 1 ? buttonColor : subtext, 1,
-                    fontWeight: FontWeight.bold, fontFamily: 'Lato'),
+              Tab(
+                child: Container(
+                  decoration: position == 1
+                      ? BoxDecoration(
+                          color: slotbg,
+                          borderRadius: BorderRadius.circular(16),
+                        )
+                      : null,
+                  height: FetchPixels.getPixelHeight(40),
+                  width: FetchPixels.getPixelHeight(108),
+                  alignment: Alignment.center,
+                  child: getCustomFont(
+                    "Paid",
+                    18,
+                    position == 1 ? buttonColor : subtext,
+                    1,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Lato',
+                  ),
+                ),
               ),
-            ),
-            Tab(
-              child: Container(
-                decoration: position == 2
-                    ? BoxDecoration(
-                    color: slotbg,
-                    borderRadius: BorderRadius.circular(
-                        FetchPixels.getPixelHeight(12)))
-                    : null,
-                height: FetchPixels.getPixelHeight(40),
-                width: FetchPixels.getPixelHeight(108),
-                alignment: Alignment.center,
-                child: getCustomFont(
-                    "History", 18, position == 2 ? buttonColor : subtext, 1,
-                    fontWeight: FontWeight.bold,fontFamily: 'Lato'),
-              ),
-            )
-          ],
-          controller: tabController,
+              Tab(
+                child: Container(
+                  decoration: position == 2
+                      ? BoxDecoration(
+                          color: slotbg,
+                          borderRadius: BorderRadius.circular(16),
+                        )
+                      : null,
+                  height: FetchPixels.getPixelHeight(40),
+                  width: FetchPixels.getPixelHeight(108),
+                  alignment: Alignment.center,
+                  child: getCustomFont(
+                    "History",
+                    18,
+                    position == 2 ? buttonColor : subtext,
+                    1,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Lato',
+                  ),
+                ),
+              )
+            ],
+            controller: tabController,
+          ),
         ),
       ),
     );

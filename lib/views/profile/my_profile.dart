@@ -28,7 +28,7 @@ class _MyProfileState extends State<MyProfile> {
           "My Profile",
           style: SafeGoogleFont(
             'Lato',
-            fontSize:  36,
+            fontSize:  24,
             fontWeight:  FontWeight.bold,
             color:  Color(0xff2d366f),
           ),
@@ -109,35 +109,40 @@ class _MyProfileState extends State<MyProfile> {
   }
 
   Widget _buildProfileField(String label, String value) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black),
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: SafeGoogleFont(
-              'Lato',
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff2d366f),
+    return Material(
+      elevation: 4,
+      borderRadius: BorderRadius.circular(10),
+      color: Colors.white,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.white),
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: SafeGoogleFont(
+                'Lato',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xff2d366f),
+              ),
             ),
-          ),
-          SizedBox(height: 8.0, width: 356),
-          Text(
-            value,
-            style: SafeGoogleFont(
-              'Lato',
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
+            SizedBox(height: 8.0, width: 356),
+            Text(
+              value,
+              style: SafeGoogleFont(
+                'Lato',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

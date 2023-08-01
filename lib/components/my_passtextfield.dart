@@ -25,31 +25,36 @@ class _MyPassTextFieldState extends State<MyPassTextField> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
-      child: TextField(
-        controller: widget.controller,
-        obscureText: _isObscure,
-        decoration: InputDecoration(
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white10),
-          ),
-          fillColor: Colors.white,
-          filled: true,
-          hintText: widget.hintText,
-          hintStyle: SafeGoogleFont(
-            'Lato',
-            fontSize: 16,
-            color: Colors.grey,
-          ),
-          suffixIcon: IconButton(
-            icon: Icon(_isObscure ? Icons.visibility : Icons.visibility_off),
-            onPressed: () {
-              setState(() {
-                _isObscure = !_isObscure;
-              });
-            },
+      child: Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        child: TextField(
+          controller: widget.controller,
+          obscureText: _isObscure,
+          decoration: InputDecoration(
+            enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.white10),
+            ),
+            fillColor: Colors.white,
+            filled: true,
+            hintText: widget.hintText,
+            hintStyle: SafeGoogleFont(
+              'Lato',
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(_isObscure ? Icons.visibility : Icons.visibility_off),
+              onPressed: () {
+                setState(() {
+                  _isObscure = !_isObscure;
+                });
+              },
+            ),
           ),
         ),
       ),

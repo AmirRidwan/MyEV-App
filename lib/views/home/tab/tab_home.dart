@@ -39,7 +39,9 @@ class _TabHomeState extends State<TabHome> {
 
     // Filter charging stations based on the query
     List<ChargingStation> results = _chargingStationList
-        .where((station) => station.name.toLowerCase().contains(query.toLowerCase()))
+        .where((station) =>
+            station.name.toLowerCase().contains(query.toLowerCase()) ||
+            station.address.toLowerCase().contains(query.toLowerCase()))
         .toList();
 
     return results;
@@ -90,7 +92,8 @@ class _TabHomeState extends State<TabHome> {
       // Check if document exists
       if (doc.exists) {
         // Retrieve profile image URL field
-        profileImageUrl = (doc.data() as Map<String, dynamic>)['profileImageUrl'] ?? '';
+        profileImageUrl =
+            (doc.data() as Map<String, dynamic>)['profileImageUrl'] ?? '';
       } else {
         print('User document does not exist.');
       }
@@ -125,15 +128,18 @@ class _TabHomeState extends State<TabHome> {
     _fetchChargingStationData();
   }
 
-
   // Helper function to calculate the distance.
-  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  double _calculateDistance(
+      double lat1, double lon1, double lat2, double lon2) {
     const int earthRadius = 6371; // Radius of the earth in km
     double dLat = _degreesToRadians(lat2 - lat1);
     double dLon = _degreesToRadians(lon2 - lon1);
 
     double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_degreesToRadians(lat1)) * cos(_degreesToRadians(lat2)) * sin(dLon / 2) * sin(dLon / 2);
+        cos(_degreesToRadians(lat1)) *
+            cos(_degreesToRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
     double distance = earthRadius * c;
 
@@ -147,7 +153,7 @@ class _TabHomeState extends State<TabHome> {
 
   Future<void> _fetchChargingStationData() async {
     QuerySnapshot chargingStationSnapshot =
-    await _firestore.collection('charging_stations').get();
+        await _firestore.collection('charging_stations').get();
     List<ChargingStation> chargingStations = chargingStationSnapshot.docs
         .map((doc) => ChargingStation.fromSnapshot(doc))
         .toList();
@@ -178,33 +184,32 @@ class _TabHomeState extends State<TabHome> {
     });
   }
 
-
-
-  Widget _Features({required String image, required String name}){
+  Widget _Features({required String image, required String name}) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(color: Colors.grey,width: 2)
-      ),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.0),
+          border: Border.all(color: Colors.grey, width: 2)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             height: 60,
             decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage(image),
-                ),
+              image: DecorationImage(
+                image: AssetImage(image),
+              ),
             ),
           ),
           SizedBox(height: 10),
-          Text(name, style: SafeGoogleFont(
-            'Lato',
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
+          Text(
+            name,
+            style: SafeGoogleFont(
+              'Lato',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           )
         ],
       ),
@@ -225,32 +230,98 @@ class _TabHomeState extends State<TabHome> {
       body: RefreshIndicator(
         onRefresh: _refreshData,
         child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Container(
-                height: 200,
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                decoration: BoxDecoration(
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height: 610,
+            child: Column(
+              children: [
+                Material(
+                  elevation: 4,
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(16),
                     bottomRight: Radius.circular(16),
                   ),
-                  color: Color(0xffFFC95B),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  child: Container(
+                    height: 200,
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(16),
+                        bottomRight: Radius.circular(16),
+                      ),
+                      color: Color(0xffFFC95B),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.location_on,
-                          color: Colors.blue,
-                          size: 18,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              color: Colors.blue,
+                              size: 18,
+                            ),
+                            SizedBox(width: 5),
+                            Text(
+                              '${_cityName ?? 'Loading...'}'.toUpperCase(),
+                              style: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(width: 5),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Align(
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      _getCurrentLocation();
+                                    },
+                                    child: Text(
+                                      'Change Location',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(right: 16, top: 0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (BuildContext context) {
+                                      return MyProfile();
+                                    }),
+                                  );
+                                },
+                                child: CircleAvatar(
+                                  radius: 24,
+                                  backgroundImage: profileImageUrl != null
+                                      ? NetworkImage(profileImageUrl)
+                                      : NetworkImage(defaultUrl),
+                                  backgroundColor: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         Text(
-                          '${_cityName ?? 'Loading...'}'.toUpperCase(),
+                          'Choose EV Charger \nNearby you',
                           style: SafeGoogleFont(
                             'Lato',
                             fontSize: 16,
@@ -258,278 +329,231 @@ class _TabHomeState extends State<TabHome> {
                             color: Colors.black,
                           ),
                         ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Align(
-                          child: Row(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  _getCurrentLocation();
-                                },
-                                child: Text(
-                                  'Change Location',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                        SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                          child: Material(
+                            elevation: 4,
+                            borderRadius: BorderRadius.circular(24),
+                            color: Colors.white,
+                            child: TypeAheadFormField(
+                              textFieldConfiguration: TextFieldConfiguration(
+                                style: SafeGoogleFont(
+                                  'Lato',
+                                  fontSize: 16,
+                                  color: Colors.black54,
+                                ),
+                                controller: _searchController,
+                                decoration: InputDecoration(
+                                  hintText: 'Search',
+                                  contentPadding:
+                                      EdgeInsets.symmetric(horizontal: 16.0),
+                                  border: InputBorder.none,
                                 ),
                               ),
-                            ],
+                              suggestionsCallback: (pattern) async {
+                                // Fetch search results based on the typed query
+                                return await _getSearchResults(pattern);
+                              },
+                              itemBuilder:
+                                  (context, ChargingStation suggestion) {
+                                return ListTile(
+                                  title: Text(suggestion.name),
+                                  subtitle: Text(suggestion.address),
+                                );
+                              },
+                              onSuggestionSelected:
+                                  (ChargingStation suggestion) {
+                                _searchController.text = suggestion.name;
+                                _onSearchItemSelected(suggestion);
+                              },
+                            ),
                           ),
                         ),
-                        Container(
-                          margin: EdgeInsets.only(right: 16, top: 0),
-                          child: GestureDetector(
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Nearby Charging Stations',
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (BuildContext context) {
-                                  return MyProfile();
-                                }),
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                return ListOfChargingStations();
+                              }));
+                            },
+                            child: Text('See All'),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: 10),
+                        child: Container(
+                          height: 150,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _chargingStationList.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              ChargingStation chargingStation =
+                                  _chargingStationList[index];
+
+                              // Calculate the distance only if the user's location is available
+                              String distance = userLocation != null
+                                  ? _calculateDistance(
+                                      userLocation!.latitude,
+                                      userLocation!.longitude,
+                                      chargingStation.latitude,
+                                      chargingStation.longitude,
+                                    ).toStringAsFixed(
+                                      2) // Displaying distance with 2 decimal places
+                                  : 'N/A';
+
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          ChargingStationDetailsPage(
+                                        stationId: chargingStation.stationId,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  width: 190,
+                                  margin: EdgeInsets.only(right: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: Colors.grey, width: 2),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        chargingStation.name,
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        chargingStation.address,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                      SizedBox(height: 10),
+                                      // Add some spacing between address and distance
+                                      Text(
+                                        'Distance: ${userLocation != null ? '$distance km' : 'N/A'}',
+                                        // Display the distance or 'N/A' if userLocation is null
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               );
                             },
-                            child: CircleAvatar(
-                              radius: 24,
-                              backgroundImage: profileImageUrl != null
-                                  ? NetworkImage(profileImageUrl)
-                                  : NetworkImage(defaultUrl),
-                              backgroundColor: Colors.white,
-                            ),
                           ),
                         ),
-                      ],
-                    ),
-                    Text(
-                      'Choose EV Charger \nNearby you',
-                      style: SafeGoogleFont(
-                        'Lato',
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
                       ),
-                    ),
-                    SizedBox(height: 16),
-                    Positioned(
-                      top: 16.0,
-                      left: 16.0,
-                      right: 16.0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          color: Colors.white,
-                        ),
-                        child: TypeAheadFormField(
-                          textFieldConfiguration: TextFieldConfiguration(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: 'Search',
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                              border: InputBorder.none,
-                            ),
-                          ),
-                          suggestionsCallback: (pattern) async {
-                            // Fetch search results based on the typed query
-                            return await _getSearchResults(pattern);
-                          },
-                          itemBuilder: (context, ChargingStation suggestion) {
-                            return ListTile(
-                              title: Text(suggestion.name),
-                              subtitle: Text(suggestion.address),
-                            );
-                          },
-                          onSuggestionSelected: (ChargingStation suggestion) {
-                            _searchController.text = suggestion.name;
-                            _onSearchItemSelected(suggestion);
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Nearby Charging Stations',
-                          style: SafeGoogleFont(
-                            'Lato',
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Additional Features',
+                        style: SafeGoogleFont(
+                          'Lato',
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(
-                                builder: (BuildContext context){
-                                  return ListOfChargingStations();
-                                }
-                            )
-                            );
-                          },
-                          child: Text(
-                              'See All',
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 10),
-                      child: Container(
-                        height: 150,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: _chargingStationList.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            ChargingStation chargingStation = _chargingStationList[index];
-
-                            // Calculate the distance only if the user's location is available
-                            String distance = userLocation != null
-                                ? _calculateDistance(
-                              userLocation!.latitude,
-                              userLocation!.longitude,
-                              chargingStation.latitude,
-                              chargingStation.longitude,
-                            ).toStringAsFixed(2) // Displaying distance with 2 decimal places
-                                : 'N/A';
-
-                            return GestureDetector(
+                      ),
+                      SizedBox(height: 10), // Add SizedBox to give some space between the Text and the Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) => ChargingStationDetailsPage(
-                                      stationId: chargingStation.stationId,
-                                    ),
-                                  ),
-                                );
+                                Navigator.push(context, MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                    return StationRoadmap();
+                                  },
+                                ));
                               },
-                              child: Container(
-                                padding: EdgeInsets.all(10),
-                                width: 190,
-                                margin: EdgeInsets.only(right: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.grey, width: 2),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      chargingStation.name,
-                                      style: SafeGoogleFont(
-                                        'Lato',
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      chargingStation.address,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                    SizedBox(height: 10), // Add some spacing between address and distance
-                                    Text(
-                                      'Distance: ${userLocation != null ? '$distance km' : 'N/A'}', // Display the distance or 'N/A' if userLocation is null
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ],
+                              child: AspectRatio(
+                                aspectRatio: 1.3, // Set the desired aspect ratio here
+                                child: _Features(
+                                  image: 'assets/images/roadmap.png',
+                                  name: 'Station Roadmap',
                                 ),
                               ),
-                            );
-                          },
-                        ),
-
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Additional Features',
-                      style: SafeGoogleFont(
-                        'Lato',
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Padding(padding: EdgeInsets.only(top: 10),
-                      child: Container(
-                        height: 150,
-                        child: GridView.count(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: 1.30,
-                          children: [
-                            GestureDetector(
-                              onTap: (){
-                                Navigator.push(context, MaterialPageRoute(
-                                    builder: (BuildContext context){
-                                      return StationRoadmap();
-                                    }
-                                )
-                                );
-                              },
-                              child: _Features(
-                                  image: 'assets/images/roadmap.png',
-                                  name: 'Station Roadmap'),
                             ),
-                            GestureDetector(
-                              onTap: (){
+                          ),
+                          SizedBox(width: 12), // Add spacing between the two items in the Row
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
                                 Navigator.push(context, MaterialPageRoute(
-                                    builder: (BuildContext context){
-                                      return ListOfChargingStations();
-                                    }
-                                )
-                                );
+                                  builder: (BuildContext context) {
+                                    return ListOfChargingStations();
+                                  },
+                                ));
                               },
+                              child: AspectRatio(
+                                aspectRatio: 1.3, // Set the desired aspect ratio here
                                 child: _Features(
-                                    image: 'assets/images/chargingstation.png',
-                                    name: 'List of Charging Station')
+                                  image: 'assets/images/chargingstation.png',
+                                  name: 'List of Charging Station',
+                                ),
+                              ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-
-

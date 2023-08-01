@@ -17,21 +17,28 @@ class MyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(25),
-        margin: const EdgeInsets.symmetric(horizontal: 25),
-        decoration: BoxDecoration(
+      child: Padding(
+        padding: const EdgeInsets.all(25.0),
+        child: Material(
+          elevation: 4,
+          borderRadius: BorderRadius.circular(10),
           color: buttonColor,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: SafeGoogleFont(
-              'Lato',
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          child: Container(
+            padding: const EdgeInsets.all(25),
+            decoration: BoxDecoration(
+              color: buttonColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Text(
+                text,
+                style: SafeGoogleFont(
+                  'Lato',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ),
