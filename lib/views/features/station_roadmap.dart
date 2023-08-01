@@ -300,7 +300,8 @@ class _StationRoadmapState extends State<StationRoadmap> {
         backgroundColor: Color(0xff9dd1ea),
       ),
       body: Container(
-        width: double.infinity,
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
         child: Column(
           children: [
             Material(
