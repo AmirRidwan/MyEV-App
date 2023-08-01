@@ -299,130 +299,133 @@ class _StationRoadmapState extends State<StationRoadmap> {
         ),
         backgroundColor: Color(0xff9dd1ea),
       ),
-      body: Column(
-        children: [
-          Material(
-            elevation: 4,
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(16),
-              bottomRight: Radius.circular(16),
-            ),
-            color: Color(0xff9dd1ea),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Material(
-                        elevation: 4,
-                        borderRadius: BorderRadius.circular(14.0),
-                        color: Colors.white,
-                        child: Container(
-                          width: 380,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14.0),
-                          ),
-                          child: TextField(
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 16,
-                              color: Colors.black54,
+      body: Container(
+        width: double.infinity,
+        child: Column(
+          children: [
+            Material(
+              elevation: 4,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(16),
+                bottomRight: Radius.circular(16),
+              ),
+              color: Color(0xff9dd1ea),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(14.0),
+                          color: Colors.white,
+                          child: Container(
+                            width: 380,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14.0),
                             ),
-                            controller: startingLocationController,
-                            decoration: InputDecoration(
-                              labelText: 'Starting Location',
-                              labelStyle: SafeGoogleFont(
+                            child: TextField(
+                              style: SafeGoogleFont(
                                 'Lato',
                                 fontSize: 16,
                                 color: Colors.black54,
                               ),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 16.0),
-                              border: InputBorder.none,
+                              controller: startingLocationController,
+                              decoration: InputDecoration(
+                                labelText: 'Starting Location',
+                                labelStyle: SafeGoogleFont(
+                                  'Lato',
+                                  fontSize: 16,
+                                  color: Colors.black54,
+                                ),
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16.0),
+                                border: InputBorder.none,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 8),
-                      // Add some spacing between the text fields
-                      Material(
-                        elevation: 4,
-                        borderRadius: BorderRadius.circular(14.0),
-                        color: Colors.white,
-                        child: Container(
-                          width: 380,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14.0),
-                          ),
-                          child: TextField(
-                            style: TextStyle(
-                              fontFamily: 'Lato',
-                              fontSize: 16,
-                              color: Colors.black54,
+                        SizedBox(height: 8),
+                        // Add some spacing between the text fields
+                        Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(14.0),
+                          color: Colors.white,
+                          child: Container(
+                            width: 380,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14.0),
                             ),
-                            controller: destinationLocationController,
-                            decoration: InputDecoration(
-                              labelText: 'Destination Location',
-                              labelStyle: SafeGoogleFont(
-                                'Lato',
+                            child: TextField(
+                              style: TextStyle(
+                                fontFamily: 'Lato',
                                 fontSize: 16,
                                 color: Colors.black54,
                               ),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 16.0),
-                              border: InputBorder.none,
+                              controller: destinationLocationController,
+                              decoration: InputDecoration(
+                                labelText: 'Destination Location',
+                                labelStyle: SafeGoogleFont(
+                                  'Lato',
+                                  fontSize: 16,
+                                  color: Colors.black54,
+                                ),
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16.0),
+                                border: InputBorder.none,
+                              ),
                             ),
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xff2d366f),
+                    ),
+                    onPressed: _onSearchButtonPressed,
+                    child: Text(
+                      'Show Route and Charging Stations',
+                      style: SafeGoogleFont(
+                        'Lato',
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    primary: Color(0xff2d366f),
-                  ),
-                  onPressed: _onSearchButtonPressed,
-                  child: Text(
-                    'Show Route and Charging Stations',
-                    style: SafeGoogleFont(
-                      'Lato',
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                SizedBox(height: 8),
-              ],
+                  SizedBox(height: 8),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: GoogleMap(
-              initialCameraPosition: _initialCameraPosition != null
-                  ? CameraPosition(
-                      target: LatLng(_initialCameraPosition!.latitude,
-                          _initialCameraPosition!.longitude),
-                      zoom: 12.0,
-                    )
-                  : CameraPosition(
-                      target: LatLng(3.1663819611475787, 101.53690995000055),
-                      // Default location (Shah Alam)
-                      zoom: 12.0,
-                    ),
-              markers: {
-                ..._chargingStations,
-                if (originLatLng != null) _createOriginMarker(),
-                if (destinationLatLng != null) _createDestinationMarker()
-              },
-              polylines: _polylines,
-              onMapCreated: _onMapCreated,
+            Expanded(
+              child: GoogleMap(
+                initialCameraPosition: _initialCameraPosition != null
+                    ? CameraPosition(
+                        target: LatLng(_initialCameraPosition!.latitude,
+                            _initialCameraPosition!.longitude),
+                        zoom: 12.0,
+                      )
+                    : CameraPosition(
+                        target: LatLng(3.1663819611475787, 101.53690995000055),
+                        // Default location (Shah Alam)
+                        zoom: 12.0,
+                      ),
+                markers: {
+                  ..._chargingStations,
+                  if (originLatLng != null) _createOriginMarker(),
+                  if (destinationLatLng != null) _createDestinationMarker()
+                },
+                polylines: _polylines,
+                onMapCreated: _onMapCreated,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
