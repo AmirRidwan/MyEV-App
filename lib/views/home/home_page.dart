@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:evfinder/utils.dart';
 import 'package:evfinder/views/home/tab/tab_booking.dart';
 import 'package:evfinder/views/home/tab/tab_home.dart';
 import 'package:evfinder/views/home/tab/tab_profile.dart';
@@ -99,8 +100,9 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(height: 4),
                 Text(
                   modelItem.label ?? '',
-                  style: TextStyle(
-                    color: position == index ? Colors.white : Colors.black,
+                  style: SafeGoogleFont(
+                    'Lato',
+                    color: position == index ? Colors.white : Color(0xff2d366f),
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),

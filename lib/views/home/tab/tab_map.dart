@@ -522,7 +522,7 @@ class _MapPageState extends State<MapPage> {
                             ],
                           ),
                         ),
-                        SizedBox(width: 8.0),
+                        SizedBox(width: 2.0),
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             value: _selectedChargingSpeed,
