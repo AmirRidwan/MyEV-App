@@ -37,7 +37,7 @@ class _paidBookingState extends State<paidBooking> {
           data['selectedDate'] = (data['selectedDate'] as Timestamp?)?.toDate();
 
           // Check if the booking status is 'Paid'
-          if (data['bookingStatus'].toLowerCase() != 'unpaid') {
+          if (data['bookingStatus'].toLowerCase() != 'un  paid') {
             unpaidBookings.add(data);
           }
         }
