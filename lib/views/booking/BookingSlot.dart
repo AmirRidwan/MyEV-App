@@ -30,10 +30,11 @@ class BookingPage extends StatefulWidget {
 }
 
 class _BookingPageState extends State<BookingPage> {
-  String selectedStartTime = '12:00 PM'; // Make sure this value is unique
+  String selectedStartTime = '12:00 PM';
   String selectedEndTime = '01:00 PM';
   int selectedHours = 1;
   TextEditingController _dateController = TextEditingController();
+
 
 // The currently selected payment method
   PaymentMethod? _selectedPaymentMethod;
@@ -222,6 +223,33 @@ class _BookingPageState extends State<BookingPage> {
 
   Future<void> _handlePayment() async {
     String selectedDateText = _dateController.text;
+    String userId = getCurrentUserId();
+
+    // Fetch the user's display name from Firestore
+    String? customerName = await _getCustomerName(userId);
+
+    if (customerName == null) {
+      // Handle the case where customer name is not found
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text('Customer name not found.'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
     if (selectedDateText.isEmpty) {
       // Show an error message if the date is not selected
       showDialog(
@@ -328,6 +356,7 @@ class _BookingPageState extends State<BookingPage> {
 
     // Create a new Booking object with the booking details and initial status as 'Unpaid'
     Booking booking = Booking(
+      customerName: customerName,
       bookingId: '',
       userId: getCurrentUserId(),
       stationId: widget.stationId,
@@ -361,6 +390,25 @@ class _BookingPageState extends State<BookingPage> {
     } else {
       // Payment was canceled, update the booking status to 'Unpaid'
       await _updateBookingStatus(context, booking, Booking.unpaidStatus);
+    }
+  }
+
+  Future<String?> _getCustomerName(String userId) async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> userSnapshot = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (userSnapshot.exists) {
+        return userSnapshot.data()?['displayName'];
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching customer name: $e');
+      return null;
     }
   }
 

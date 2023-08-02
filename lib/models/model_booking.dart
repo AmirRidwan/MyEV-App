@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Booking {
-  final String bookingId; // Add the bookingId field
+  final String bookingId;
   final String userId;
   final String stationId;
   final String startTime;
@@ -12,13 +12,14 @@ class Booking {
   final Timestamp bookingTimestamp;
   final String bookingStatus;
   final DateTime selectedDate;
+  final String? customerName;
 
   // Define constants for booking status
   static const String paidStatus = 'Paid';
   static const String unpaidStatus = 'Unpaid';
 
   Booking({
-    required this.bookingId, // Add the bookingId field to the constructor
+    required this.bookingId,
     required this.userId,
     required this.stationId,
     required this.startTime,
@@ -29,12 +30,13 @@ class Booking {
     required this.bookingTimestamp,
     required this.bookingStatus,
     required this.selectedDate,
+    this.customerName,
   });
 
   // Convert Booking object to a map representation for Firestore
   Map<String, dynamic> toMap() {
     return {
-      'bookingId': bookingId, // Include the bookingId in the map
+      'bookingId': bookingId,
       'userId': userId,
       'stationId': stationId,
       'startTime': startTime,
@@ -45,14 +47,15 @@ class Booking {
       'bookingTimestamp': bookingTimestamp,
       'bookingStatus': bookingStatus,
       'selectedDate': Timestamp.fromDate(selectedDate),
+      'customerName': customerName, // Include customerName in the map
     };
   }
 
   // Create a Booking object from a Firestore document snapshot
-  static Booking fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
-    final data = snapshot.data()!;
+  static Booking fromSnapshot(DocumentSnapshot snapshot) {
+    final data = snapshot.data() as Map<String, dynamic>;
     return Booking(
-      bookingId: snapshot.id, // Extract the document ID as bookingId
+      bookingId: snapshot.id,
       userId: data['userId'],
       stationId: data['stationId'],
       startTime: data['startTime'],
@@ -62,10 +65,30 @@ class Booking {
       totalAmount: data['totalAmount'],
       bookingTimestamp: data['bookingTimestamp'],
       bookingStatus: data['bookingStatus'],
-      selectedDate: data['selectedDate'],
+      selectedDate: (data['selectedDate'] as Timestamp).toDate(),
+      customerName: data['customerName'],
     );
   }
 
+  // Create a Booking object with default values for nullable fields
+  factory Booking.empty() {
+    return Booking(
+      bookingId: '',
+      userId: '',
+      stationId: '',
+      startTime: '',
+      endTime: '',
+      hoursOfCharge: 0,
+      paymentMethod: '',
+      totalAmount: 0.0,
+      bookingTimestamp: Timestamp.now(),
+      bookingStatus: '',
+      selectedDate: DateTime.now(),
+      customerName: null,
+    );
+  }
+
+  // Create a copy of the Booking object with some fields updated
   Booking copyWith({
     String? bookingId,
     String? userId,
@@ -75,12 +98,10 @@ class Booking {
     int? hoursOfCharge,
     String? paymentMethod,
     double? totalAmount,
-    String? bookingDate,
-    String? bookingTime,
     Timestamp? bookingTimestamp,
     String? bookingStatus,
     DateTime? selectedDate,
-
+    String? customerName,
   }) {
     return Booking(
       bookingId: bookingId ?? this.bookingId,
@@ -94,6 +115,7 @@ class Booking {
       bookingTimestamp: bookingTimestamp ?? this.bookingTimestamp,
       bookingStatus: bookingStatus ?? this.bookingStatus,
       selectedDate: selectedDate ?? this.selectedDate,
+      customerName: customerName ?? this.customerName,
     );
   }
 }
