@@ -1,3 +1,7 @@
+import 'package:evfinder/views/profile/setting/aboutUs.dart';
+import 'package:evfinder/views/profile/setting/changePassword.dart';
+import 'package:evfinder/views/profile/setting/privacyPolicy.dart';
+import 'package:evfinder/views/profile/setting/termsConditions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -44,7 +48,12 @@ class _SettingPageState extends State<SettingPage> {
               borderRadius: BorderRadius.circular(10),
               child: GestureDetector(
                 onTap: () {
-                  // Handle onTap event
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (BuildContext context){
+                        return ChangePasswordPage();
+                      }
+                  ),
+                  );
                 },
                 child: Container(
                   height: 60,
@@ -85,7 +94,12 @@ class _SettingPageState extends State<SettingPage> {
               borderRadius: BorderRadius.circular(10),
               child: GestureDetector(
                 onTap: () {
-                  // Handle onTap event
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (BuildContext context){
+                        return TermsAndConditionsPage();
+                      }
+                  ),
+                  );
                 },
                 child: Container(
                   height: 60,
@@ -128,7 +142,12 @@ class _SettingPageState extends State<SettingPage> {
               borderRadius: BorderRadius.circular(10),
               child: GestureDetector(
                 onTap: () {
-                  // Handle onTap event
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (BuildContext context){
+                        return PrivacyPolicyPage();
+                      }
+                  ),
+                  );
                 },
                 child: Container(
                   height: 60,
@@ -147,7 +166,7 @@ class _SettingPageState extends State<SettingPage> {
                       SizedBox(width: 20),
                       Center(
                         child: Text(
-                          "Privacy & Policy",
+                          "Privacy Policy",
                           style: SafeGoogleFont(
                             'Lato',
                             fontSize:  18,
@@ -173,7 +192,7 @@ class _SettingPageState extends State<SettingPage> {
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(
                       builder: (BuildContext context){
-                        return const SettingPage();
+                        return AboutUsPage();
                       }
                   )
                   );

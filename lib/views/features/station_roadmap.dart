@@ -29,7 +29,7 @@ class _StationRoadmapState extends State<StationRoadmap> {
 
   // Define the maximum distance (in meters) to consider a charging station as near the route.
   static const double maxDistanceToRoute =
-      1000.0; // Adjust this value as needed.
+  1000.0; // Adjust this value as needed.
 
   // Custom markers for origin, destination, and charging stations.
   BitmapDescriptor? originMarker;
@@ -165,11 +165,11 @@ class _StationRoadmapState extends State<StationRoadmap> {
     return null;
   }
 
-  void _fetchChargingStations(
-      String origin, String destination, List<LatLng> routeCoordinates) async {
+  void _fetchChargingStations(String origin, String destination,
+      List<LatLng> routeCoordinates) async {
     try {
       CollectionReference chargingStationsCollection =
-          FirebaseFirestore.instance.collection('charging_stations');
+      FirebaseFirestore.instance.collection('charging_stations');
 
       QuerySnapshot querySnapshot = await chargingStationsCollection.get();
       List<QueryDocumentSnapshot> documents = querySnapshot.docs;
@@ -319,7 +319,10 @@ class _StationRoadmapState extends State<StationRoadmap> {
                         borderRadius: BorderRadius.circular(14.0),
                         color: Colors.white,
                         child: Container(
-                          width: MediaQuery.of(context).size.width,
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .width,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(14.0),
@@ -339,7 +342,7 @@ class _StationRoadmapState extends State<StationRoadmap> {
                                 color: Colors.black54,
                               ),
                               contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 16.0),
+                              EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
                               border: InputBorder.none,
                             ),
                           ),
@@ -352,7 +355,10 @@ class _StationRoadmapState extends State<StationRoadmap> {
                         borderRadius: BorderRadius.circular(14.0),
                         color: Colors.white,
                         child: Container(
-                          width: MediaQuery.of(context).size.width,
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .width,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(14.0),
@@ -372,7 +378,7 @@ class _StationRoadmapState extends State<StationRoadmap> {
                                 color: Colors.black54,
                               ),
                               contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 16.0),
+                              EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                               border: InputBorder.none,
                             ),
                           ),
@@ -404,15 +410,15 @@ class _StationRoadmapState extends State<StationRoadmap> {
             child: GoogleMap(
               initialCameraPosition: _initialCameraPosition != null
                   ? CameraPosition(
-                      target: LatLng(_initialCameraPosition!.latitude,
-                          _initialCameraPosition!.longitude),
-                      zoom: 12.0,
-                    )
+                target: LatLng(_initialCameraPosition!.latitude,
+                    _initialCameraPosition!.longitude),
+                zoom: 12.0,
+              )
                   : CameraPosition(
-                      target: LatLng(3.1663819611475787, 101.53690995000055),
-                      // Default location (Shah Alam)
-                      zoom: 12.0,
-                    ),
+                target: LatLng(3.1663819611475787, 101.53690995000055),
+                // Default location (Shah Alam)
+                zoom: 12.0,
+              ),
               markers: {
                 ..._chargingStations,
                 if (originLatLng != null) _createOriginMarker(),

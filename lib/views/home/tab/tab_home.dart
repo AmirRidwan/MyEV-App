@@ -256,30 +256,31 @@ class _TabHomeState extends State<TabHome> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              color: Colors.blue,
-                              size: 18,
-                            ),
-                            SizedBox(width: 5),
-                            Text(
-                              '${_cityName ?? 'Loading...'}'.toUpperCase(),
-                              style: SafeGoogleFont(
-                                'Lato',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Align(
-                              child: Row(
+                              alignment: Alignment.center,
+                              child: Column(
                                 children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on,
+                                        color: Colors.blue,
+                                        size: 18,
+                                      ),
+                                      Text(
+                                        '${_cityName ?? 'Loading...'}'.toUpperCase(),
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 10),
                                   GestureDetector(
                                     onTap: () {
                                       _getCurrentLocation();
@@ -298,7 +299,7 @@ class _TabHomeState extends State<TabHome> {
                               ),
                             ),
                             Container(
-                              margin: EdgeInsets.only(right: 16, top: 0),
+                              margin: EdgeInsets.only(right: 10, top: 5),
                               child: GestureDetector(
                                 onTap: () {
                                   Navigator.push(
@@ -310,7 +311,7 @@ class _TabHomeState extends State<TabHome> {
                                   );
                                 },
                                 child: CircleAvatar(
-                                  radius: 24,
+                                  radius: 32,
                                   backgroundImage: profileImageUrl != null
                                       ? NetworkImage(profileImageUrl)
                                       : NetworkImage(defaultUrl),
@@ -320,6 +321,7 @@ class _TabHomeState extends State<TabHome> {
                             ),
                           ],
                         ),
+                        SizedBox(height: 9),
                         Text(
                           'Choose EV Charger \nNearby you',
                           style: SafeGoogleFont(
@@ -330,44 +332,41 @@ class _TabHomeState extends State<TabHome> {
                           ),
                         ),
                         SizedBox(height: 16),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                          child: Material(
-                            elevation: 4,
-                            borderRadius: BorderRadius.circular(24),
-                            color: Colors.white,
-                            child: TypeAheadFormField(
-                              textFieldConfiguration: TextFieldConfiguration(
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 16,
-                                  color: Colors.black54,
-                                ),
-                                controller: _searchController,
-                                decoration: InputDecoration(
-                                  hintText: 'Search',
-                                  contentPadding:
-                                      EdgeInsets.symmetric(horizontal: 16.0),
-                                  border: InputBorder.none,
-                                ),
+                        Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(24),
+                          color: Colors.white,
+                          child: TypeAheadFormField(
+                            textFieldConfiguration: TextFieldConfiguration(
+                              style: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 16,
+                                color: Colors.black54,
                               ),
-                              suggestionsCallback: (pattern) async {
-                                // Fetch search results based on the typed query
-                                return await _getSearchResults(pattern);
-                              },
-                              itemBuilder:
-                                  (context, ChargingStation suggestion) {
-                                return ListTile(
-                                  title: Text(suggestion.name),
-                                  subtitle: Text(suggestion.address),
-                                );
-                              },
-                              onSuggestionSelected:
-                                  (ChargingStation suggestion) {
-                                _searchController.text = suggestion.name;
-                                _onSearchItemSelected(suggestion);
-                              },
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Search',
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16.0),
+                                border: InputBorder.none,
+                              ),
                             ),
+                            suggestionsCallback: (pattern) async {
+                              // Fetch search results based on the typed query
+                              return await _getSearchResults(pattern);
+                            },
+                            itemBuilder:
+                                (context, ChargingStation suggestion) {
+                              return ListTile(
+                                title: Text(suggestion.name),
+                                subtitle: Text(suggestion.address),
+                              );
+                            },
+                            onSuggestionSelected:
+                                (ChargingStation suggestion) {
+                              _searchController.text = suggestion.name;
+                              _onSearchItemSelected(suggestion);
+                            },
                           ),
                         ),
                       ],

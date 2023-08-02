@@ -183,126 +183,131 @@ class _historyBookingState extends State<historyBooking> {
 
             return Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.black, width: 1),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Text(
-                          '${chargingStationName ?? 'N/A'}',
-                          style: SafeGoogleFont(
-                            'Lato',
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Text(
-                            'Status: ',
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white, width: 1),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Text(
+                            '${chargingStationName ?? 'N/A'}',
                             style: SafeGoogleFont(
                               'Lato',
-                              fontSize: 14,
-                              color: Colors.black54,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
                           ),
-                          Text(
-                            '${booking['bookingStatus']}',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 14,
-                              color: statusColor,
+                        ),
+                        SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Text(
+                              'Status: ',
+                              style: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 14,
+                                color: Colors.black54,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Date: ${DateFormat('yyyy-MM-dd').format(booking['bookingDateTime'])}',
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 14,
-                          color: Colors.black54,
+                            Text(
+                              '${booking['bookingStatus']}',
+                              style: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 14,
+                                color: statusColor,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Selected Date: ${DateFormat('yyyy-MM-dd').format(booking['selectedDate'])}',
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Time: ${DateFormat('HH:mm').format(booking['bookingDateTime'])}',
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Start Time: ${booking['startTime']}',
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'End Time: ${booking['endTime']}',
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Hours of Charge: ${booking['hoursOfCharge']}',
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Payment Method: ${booking['paymentMethod']}',
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 14,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: Text(
-                          'Total Amount: RM${booking['totalAmount'].toStringAsFixed(2)}',
+                        SizedBox(height: 4),
+                        Text(
+                          'Date: ${DateFormat('yyyy-MM-dd').format(booking['bookingDateTime'])}',
                           style: SafeGoogleFont(
                             'Lato',
                             fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Colors.black54,
                           ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 4),
+                        Text(
+                          'Selected Date: ${DateFormat('yyyy-MM-dd').format(booking['selectedDate'])}',
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Time: ${DateFormat('HH:mm').format(booking['bookingDateTime'])}',
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Start Time: ${booking['startTime']}',
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'End Time: ${booking['endTime']}',
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Hours of Charge: ${booking['hoursOfCharge']}',
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Payment Method: ${booking['paymentMethod']}',
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 14,
+                            color: Colors.black54,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Text(
+                            'Total Amount: RM${booking['totalAmount'].toStringAsFixed(2)}',
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

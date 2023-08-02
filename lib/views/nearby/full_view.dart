@@ -19,14 +19,7 @@ class FullView extends StatefulWidget {
 }
 
 class _FullViewState extends State<FullView> {
-  List<String> timeLists = [
-    '10:00 AM',
-    '11:00 AM',
-    '12:00 PM',
-    '01:00 PM',
-    '02:00 PM',
-    // Add more time slots as needed
-  ];
+
   int select = 0;
 
   Map<String, dynamic>? chargingStationData;
@@ -157,7 +150,7 @@ class _FullViewState extends State<FullView> {
                 getCustomFont("Price Rate", 16, textColor, 1,
                     fontWeight: FontWeight.w500),
                 getVerSpace(FetchPixels.getPixelHeight(8)),
-                getCustomFont('RM${chargingStationData?['chargingRate'] ?? 'Loading..'}/min', 16, Colors.black, 1,
+                getCustomFont('RM${chargingStationData?['chargingRate'] ?? 'Loading..'}/hour', 16, Colors.black, 1,
                     fontWeight: FontWeight.w700)
               ],
             )
