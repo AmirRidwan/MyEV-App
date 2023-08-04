@@ -408,6 +408,7 @@ class _StationRoadmapState extends State<StationRoadmap> {
           ),
           Expanded(
             child: GoogleMap(
+              compassEnabled: true,
               initialCameraPosition: _initialCameraPosition != null
                   ? CameraPosition(
                 target: LatLng(_initialCameraPosition!.latitude,

@@ -279,14 +279,35 @@ class _ListOfChargingStationsState extends State<ListOfChargingStations> {
                         onPressed: () {
                           Navigator.pop(context, 'apply');
                         },
-                        child: Text('Apply Filter'),
+                        child: Text(
+                            'Apply Filters',
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize:  18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       SizedBox(width: 8),
                       ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          side: BorderSide(
+                            color: Colors.blue,
+                          )
+                        ),
                         onPressed: () {
                           _resetFilterOptions();
                         },
-                        child: Text('Reset'),
+                        child: Text(
+                            'Reset',
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize:  18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -635,7 +656,7 @@ class _ListOfChargingStationsState extends State<ListOfChargingStations> {
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black54,
-                                        )
+                                        ),
                                       ),
                                     ],
                                   ),

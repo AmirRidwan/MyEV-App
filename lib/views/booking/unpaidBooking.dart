@@ -91,7 +91,14 @@ class _unpaidBookingState extends State<unpaidBooking> {
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('Cancel'),
+              child: Text(
+                  'Cancel',
+                style: SafeGoogleFont(
+                  'Lato',
+                  fontSize:  16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             TextButton(
               onPressed: () async {
@@ -99,7 +106,14 @@ class _unpaidBookingState extends State<unpaidBooking> {
                 Navigator.of(context).pop(); // Close the dialog
                 _fetchBookingData(); // Refresh the widget to update the UI with the new payment status
               },
-              child: Text('Confirm'),
+              child: Text(
+                  'Confirm',
+                style: SafeGoogleFont(
+                  'Lato',
+                  fontSize:  16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );

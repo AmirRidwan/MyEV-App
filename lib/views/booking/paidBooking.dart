@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 import '../../utils.dart';
+import 'LeaveReviewPage.dart';
 
 class paidBooking extends StatefulWidget {
   final String currentUserId;
@@ -14,36 +15,45 @@ class paidBooking extends StatefulWidget {
 }
 
 class _paidBookingState extends State<paidBooking> {
-  // Firestore instance
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  // List to store booking data
   List<Map<String, dynamic>> bookingData = [];
   Map<String, String?> chargingStationNames = {};
 
-  // Method to fetch booking data from Firestore
   Future<void> _fetchBookingData() async {
     try {
-      QuerySnapshot<Map<String, dynamic>> snapshot = await firestore
+      QuerySnapshot<Map<String, dynamic>> bookingSnapshot = await firestore
           .collection('bookings')
           .where('userId', isEqualTo: widget.currentUserId)
           .get();
-      if (snapshot.docs.isNotEmpty) {
-        List<Map<String, dynamic>> unpaidBookings = [];
-        for (var doc in snapshot.docs) {
-          final data = doc.data()! as Map<String, dynamic>;
-          data['bookingId'] = doc.id; // Assign the document ID to 'bookingId'
-          data['bookingDateTime'] = (data['bookingTimestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
-          data['selectedDate'] = (data['selectedDate'] as Timestamp?)?.toDate();
+
+      if (bookingSnapshot.docs.isNotEmpty) {
+        List<Map<String, dynamic>> paidBookings = [];
+
+        for (var bookingDoc in bookingSnapshot.docs) {
+          final bookingData = bookingDoc.data()! as Map<String, dynamic>;
+          bookingData['bookingId'] = bookingDoc.id;
+          bookingData['bookingDateTime'] =
+              (bookingData['bookingTimestamp'] as Timestamp?)?.toDate() ??
+                  DateTime.now();
+          bookingData['selectedDate'] =
+              (bookingData['selectedDate'] as Timestamp?)?.toDate();
 
           // Check if the booking status is 'Paid'
-          if (data['bookingStatus'].toLowerCase() != 'un  paid') {
-            unpaidBookings.add(data);
+          if (bookingData['bookingStatus'].toLowerCase() != 'unpaid') {
+            QuerySnapshot<Map<String, dynamic>> reviewQuerySnapshot =
+            await firestore.collection('reviews')
+                .where('bookingId', isEqualTo: bookingDoc.id)
+                .get();
+
+            bookingData['reviewExists'] = reviewQuerySnapshot.docs.isNotEmpty;
+
+            paidBookings.add(bookingData);
           }
         }
 
         setState(() {
-          bookingData = unpaidBookings;
+          bookingData = paidBookings;
         });
       }
     } catch (e) {
@@ -102,12 +112,13 @@ class _paidBookingState extends State<paidBooking> {
           itemCount: bookingData.length,
           itemBuilder: (context, index) {
             Map<String, dynamic> booking = bookingData[index];
-            String? chargingStationName = chargingStationNames[booking['stationId']];
-
-            // Determine the color based on the 'bookingStatus' value
-            Color statusColor = booking['bookingStatus'].toLowerCase() == 'paid'
+            String? chargingStationName =
+            chargingStationNames[booking['stationId']];
+            Color statusColor = booking['bookingStatus'].toLowerCase() ==
+                'paid'
                 ? Colors.green
                 : Colors.red;
+            bool canLeaveReview = booking['bookingStatus'].toLowerCase() == 'paid' && !booking['reviewExists'];
 
             return Padding(
               padding: const EdgeInsets.all(8.0),
@@ -234,6 +245,22 @@ class _paidBookingState extends State<paidBooking> {
                             ),
                           ),
                         ),
+                        if (canLeaveReview)
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ReviewPage(
+                                    currentUserId: widget.currentUserId,
+                                    bookingId: booking['bookingId'],
+                                    stationId: booking['stationId'],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text('Leave Review'),
+                          ),
                       ],
                     ),
                   ),

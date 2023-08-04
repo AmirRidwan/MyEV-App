@@ -24,43 +24,36 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: AnimatedSplashScreen(
-          splash: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/myev-logo.png'),
-                fit: BoxFit.contain,
-                alignment: Alignment.center,
-              ),
+      home: AnimatedSplashScreen(
+        splashIconSize: double.infinity,
+        splash: Center(
+          child: Container(
+            height: 300,
+            width: 300,
+            child: const Image(
+              image: AssetImage('assets/images/myev-logo.png'),
             ),
           ),
-          nextScreen: LoginPage(
-            showRegisterPage: false,
-            toggleScreens: () {
-              Navigator.pushNamed(context, '/register');
-            },
-          ),
-          splashTransition: SplashTransition.fadeTransition,
-          duration: 3000,
         ),
+        nextScreen: LoginPage(
+          showRegisterPage: false,
+          toggleScreens: () {
+            Navigator.pushNamed(context, '/register');
+          },
+        ),
+        splashTransition: SplashTransition.fadeTransition,
+        duration: 3000,
       ),
       routes: {
         '/home': (context) => HomePage(),
         '/admin': (context) => AdminHomePage(),
         '/register': (context) => RegisterPage(
-          showRegisterPage: true,
-          toggleScreens: () {
-            Navigator.pushNamed(context, '/');
-          },
-        ),
+              showRegisterPage: true,
+              toggleScreens: () {
+                Navigator.pushNamed(context, '/');
+              },
+            ),
       },
     );
   }
 }
-
-
-
-
-

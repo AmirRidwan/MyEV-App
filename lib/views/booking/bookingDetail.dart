@@ -69,7 +69,7 @@ class BookingDetailPage extends StatelessWidget {
             child: SingleChildScrollView(
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                height: 873,
+                height: 896,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -96,7 +96,9 @@ class BookingDetailPage extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.assignment_turned_in_outlined,
-                          color: booking.bookingStatus == 'Paid' ? Colors.green : Colors.red,
+                          color: booking.bookingStatus == 'Paid'
+                              ? Colors.green
+                              : Colors.red,
                           size: 20,
                         ),
                         SizedBox(width: 16),
@@ -105,7 +107,9 @@ class BookingDetailPage extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
-                            color: booking.bookingStatus == 'Paid' ? Colors.green : Colors.red,
+                            color: booking.bookingStatus == 'Paid'
+                                ? Colors.green
+                                : Colors.red,
                           ),
                         ),
                       ],
@@ -149,15 +153,19 @@ class BookingDetailPage extends StatelessWidget {
                     ),
                     SizedBox(height: 16),
                     FutureBuilder<Map<String, String>>(
-                      future: FirestoreService().getChargingStationDetails(booking.stationId),
+                      future: FirestoreService()
+                          .getChargingStationDetails(booking.stationId),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return Text('Location: Loading...');
                         } else if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         } else {
-                          String chargingStationName = snapshot.data!['name'] ?? 'Unknown Charging Station';
-                          String chargingStationAddress = snapshot.data!['address'] ?? 'Unknown Address';
+                          String chargingStationName = snapshot.data!['name'] ??
+                              'Unknown Charging Station';
+                          String chargingStationAddress =
+                              snapshot.data!['address'] ?? 'Unknown Address';
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,11 +200,8 @@ class BookingDetailPage extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       chargingStationAddress,
-                                      style: SafeGoogleFont(
-                                          'Lato',
-                                          fontSize: 14,
-                                          color: Colors.grey
-                                      ),
+                                      style: SafeGoogleFont('Lato',
+                                          fontSize: 14, color: Colors.grey),
                                     ),
                                   ),
                                 ],
@@ -214,11 +219,12 @@ class BookingDetailPage extends StatelessWidget {
                           color: Colors.black,
                           size: 20,
                         ),
-                        SizedBox(width: 16), // Add some space between the icon and the text
+                        SizedBox(width: 16),
+                        // Add some space between the icon and the text
                         Text(
                           '${DateFormat('EEEE, dd MMM').format(booking.selectedDate)}',
                           style: SafeGoogleFont(
-                              'Lato',
+                            'Lato',
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
@@ -267,7 +273,8 @@ class BookingDetailPage extends StatelessWidget {
 
                     // Payment Section
                     Theme(
-                      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                      data: Theme.of(context)
+                          .copyWith(dividerColor: Colors.transparent),
                       child: ListTileTheme(
                         contentPadding: EdgeInsets.all(0),
                         child: ExpansionTile(
@@ -293,7 +300,8 @@ class BookingDetailPage extends StatelessWidget {
                               child: Column(
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Payment Method',
@@ -313,7 +321,8 @@ class BookingDetailPage extends StatelessWidget {
                                   ),
                                   SizedBox(height: 16),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Total Amount',
@@ -342,11 +351,11 @@ class BookingDetailPage extends StatelessWidget {
                     Divider(
                         color: Colors.grey, //color of divider
                         height: 16,
-                        thickness: 1
-                    ),
+                        thickness: 1),
                     // Center Policy Section
                     Theme(
-                      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                      data: Theme.of(context)
+                          .copyWith(dividerColor: Colors.transparent),
                       child: ListTileTheme(
                         contentPadding: EdgeInsets.all(0),
                         child: ExpansionTile(
@@ -470,8 +479,85 @@ class BookingDetailPage extends StatelessWidget {
                     Divider(
                         color: Colors.grey, //color of divider
                         height: 16,
-                        thickness: 1
-                    ),
+                        thickness: 1),
+                    //Continue Payment Button
+                    if (booking.bookingStatus == 'Unpaid')
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xff2d366f),
+                          ),
+                          onPressed: () {
+                            // Show the confirmation dialog
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: Text(
+                                      'Confirm Payment',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize:  18,
+                                      fontWeight:  FontWeight.bold,
+                                      color:  Colors.black,
+                                    ),
+                                  ),
+                                  content: Text(
+                                    'Are you sure you want to proceed with the payment?',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize:  16,
+                                      color:  Colors.black54,
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text(
+                                          'Cancel',
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize:  16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        // Update the booking status to Paid in Firebase
+                                        FirestoreService().updateBookingStatus(
+                                          bookingId: booking.bookingId,
+                                          newStatus: 'Paid',
+                                        );
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text(
+                                          'Confirm',
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize:  16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          child: Text(
+                              'Continue Payment',
+                            style: SafeGoogleFont(
+                                'Lato',
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

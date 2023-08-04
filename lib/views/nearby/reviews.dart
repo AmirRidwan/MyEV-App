@@ -1,260 +1,145 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:percent_indicator/linear_percent_indicator.dart';
 
-import '../../base/color_data.dart';
-import '../../base/resizer/fetch_pixels.dart';
-import '../../base/widget_utils.dart';
-import '../../models/model_review.dart';
-
+import '../../models/model_leave_review.dart';
 
 class Reviews extends StatefulWidget {
-  const Reviews({Key? key}) : super(key: key);
+  final String stationId;
+  const Reviews({Key? key, required this.stationId}) : super(key: key);
 
   @override
   State<Reviews> createState() => _ReviewsState();
 }
 
 class _ReviewsState extends State<Reviews> {
-  List<ModelReview> reviewLists = [
-    ModelReview("review1.png",
-        '“I Was A vrey First To Pleased With This Charging Satation”.'),
-    ModelReview("review2.png",
-        '“Thank You For Your Services That Save My Time Very Much”.'),
-    ModelReview("review3.png",
-        '“This app is very usefull for all the person in around, so thank you so much for this all”.'),
-    ModelReview("review4.png",
-        '“This app is very usefull for all the person in around, so thank you so much for this all”.')
-  ];
-
   @override
   Widget build(BuildContext context) {
-    FetchPixels(context);
-    return ListView(
-      padding: EdgeInsets.symmetric(horizontal: FetchPixels.getPixelHeight(20)),
-      primary: true,
-      shrinkWrap: true,
-      physics: const BouncingScrollPhysics(),
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('reviews')
+          .where('stationId', isEqualTo: widget.stationId)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('No reviews available.'));
+        }
+
+        List<Review> reviewList = snapshot.data!.docs
+            .map((doc) => Review.fromMap(doc.data() as Map<String, dynamic>))
+            .toList();
+
+        return Column(
           children: [
-            getCustomFont("Rating & Review", 17, Colors.black, 1,
-                fontWeight: FontWeight.w700),
-            getCustomFont("View All", 15, Colors.black, 1,
-                fontWeight: FontWeight.w700)
-          ],
-        ),
-        getVerSpace(FetchPixels.getPixelHeight(16)),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                getCustomFont("4.5", 36, Colors.black, 1,
-                    fontWeight: FontWeight.w700),
-                getCustomFont("out of 5", 16, Colors.black, 1,
-                    fontWeight: FontWeight.w500)
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Row(
-                  children: [
-                    RatingBar(
-                      initialRating: 5,
-                      direction: Axis.horizontal,
-                      allowHalfRating: false,
-                      itemSize: FetchPixels.getPixelHeight(11),
-                      itemCount: 5,
-                      ratingWidget: RatingWidget(
-                        full: getSvgImage("like.svg"),
-                        half: getSvgImage("like.svg"),
-                        empty: getSvgImage("like_unselected.svg"),
-                      ),
-                      itemPadding: EdgeInsets.symmetric(
-                          horizontal: FetchPixels.getPixelHeight(1)),
-                      onRatingUpdate: (rating) {},
-                    ),
-                    getHorSpace(FetchPixels.getPixelHeight(6)),
-                    LinearPercentIndicator(
-                      width: FetchPixels.getPixelHeight(180),
-                      animation: false,
-                      lineHeight: FetchPixels.getPixelHeight(4),
-                      percent: 1.0,
-                      barRadius:
-                      Radius.circular(FetchPixels.getPixelHeight(10)),
-                      progressColor: buttonColor,
-                      backgroundColor: borderColor,
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
-                getVerSpace(FetchPixels.getPixelHeight(6)),
-                Row(
-                  children: [
-                    RatingBar(
-                      initialRating: 4,
-                      direction: Axis.horizontal,
-                      allowHalfRating: false,
-                      itemSize: FetchPixels.getPixelHeight(11),
-                      itemCount: 4,
-                      ratingWidget: RatingWidget(
-                        full: getSvgImage("like.svg"),
-                        half: getSvgImage("like.svg"),
-                        empty: getSvgImage("like_unselected.svg"),
-                      ),
-                      itemPadding: EdgeInsets.symmetric(
-                          horizontal: FetchPixels.getPixelHeight(1)),
-                      onRatingUpdate: (rating) {},
-                    ),
-                    getHorSpace(FetchPixels.getPixelHeight(6)),
-                    LinearPercentIndicator(
-                      width: FetchPixels.getPixelHeight(180),
-                      animation: false,
-                      lineHeight: FetchPixels.getPixelHeight(4),
-                      percent: 0.60,
-                      barRadius:
-                      Radius.circular(FetchPixels.getPixelHeight(10)),
-                      progressColor: buttonColor,
-                      backgroundColor: borderColor,
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
-                getVerSpace(FetchPixels.getPixelHeight(6)),
-                Row(
-                  children: [
-                    RatingBar(
-                      initialRating: 3,
-                      direction: Axis.horizontal,
-                      allowHalfRating: false,
-                      itemSize: FetchPixels.getPixelHeight(11),
-                      itemCount: 3,
-                      ratingWidget: RatingWidget(
-                        full: getSvgImage("like.svg"),
-                        half: getSvgImage("like.svg"),
-                        empty: getSvgImage("like_unselected.svg"),
-                      ),
-                      itemPadding: EdgeInsets.symmetric(
-                          horizontal: FetchPixels.getPixelHeight(1)),
-                      onRatingUpdate: (rating) {},
-                    ),
-                    getHorSpace(FetchPixels.getPixelHeight(6)),
-                    LinearPercentIndicator(
-                      width: FetchPixels.getPixelHeight(180),
-                      animation: false,
-                      lineHeight: FetchPixels.getPixelHeight(4),
-                      percent: 0.25,
-                      barRadius:
-                      Radius.circular(FetchPixels.getPixelHeight(10)),
-                      progressColor: buttonColor,
-                      backgroundColor: borderColor,
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
-                getVerSpace(FetchPixels.getPixelHeight(6)),
-                Row(
-                  children: [
-                    RatingBar(
-                      initialRating: 2,
-                      direction: Axis.horizontal,
-                      allowHalfRating: false,
-                      itemSize: FetchPixels.getPixelHeight(11),
-                      itemCount: 2,
-                      ratingWidget: RatingWidget(
-                        full: getSvgImage("like.svg"),
-                        half: getSvgImage("like.svg"),
-                        empty: getSvgImage("like_unselected.svg"),
-                      ),
-                      itemPadding: EdgeInsets.symmetric(
-                          horizontal: FetchPixels.getPixelHeight(1)),
-                      onRatingUpdate: (rating) {},
-                    ),
-                    getHorSpace(FetchPixels.getPixelHeight(6)),
-                    LinearPercentIndicator(
-                      width: FetchPixels.getPixelHeight(180),
-                      animation: false,
-                      lineHeight: FetchPixels.getPixelHeight(4),
-                      percent: 0.40,
-                      barRadius:
-                      Radius.circular(FetchPixels.getPixelHeight(10)),
-                      progressColor: buttonColor,
-                      backgroundColor: borderColor,
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
-                getVerSpace(FetchPixels.getPixelHeight(6)),
-                Row(
-                  children: [
-                    RatingBar(
-                      initialRating: 1,
-                      direction: Axis.horizontal,
-                      allowHalfRating: false,
-                      itemSize: FetchPixels.getPixelHeight(11),
-                      itemCount: 1,
-                      ratingWidget: RatingWidget(
-                        full: getSvgImage("like.svg"),
-                        half: getSvgImage("like.svg"),
-                        empty: getSvgImage("like_unselected.svg"),
-                      ),
-                      itemPadding: EdgeInsets.symmetric(
-                          horizontal: FetchPixels.getPixelHeight(1)),
-                      onRatingUpdate: (rating) {},
-                    ),
-                    getHorSpace(FetchPixels.getPixelHeight(6)),
-                    LinearPercentIndicator(
-                      width: FetchPixels.getPixelHeight(180),
-                      animation: false,
-                      lineHeight: FetchPixels.getPixelHeight(4),
-                      percent: 0.10,
-                      barRadius:
-                      Radius.circular(FetchPixels.getPixelHeight(10)),
-                      progressColor: buttonColor,
-                      backgroundColor: borderColor,
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
-              ],
-            )
-          ],
-        ),
-        getVerSpace(FetchPixels.getPixelHeight(12)),
-        getCustomFont(
-            '4 Reviews', 14, Colors.black, 1, fontWeight: FontWeight.w500,
-            textAlign: TextAlign.end),
-        getVerSpace(FetchPixels.getPixelHeight(16)),
-        ListView.builder(
-          primary: false,
-          shrinkWrap: true,
-          physics: const BouncingScrollPhysics(),
-          itemCount: reviewLists.length,
-          itemBuilder: (context, index) {
-            ModelReview modelReview = reviewLists[index];
-            return Container(
-              margin: EdgeInsets.only(bottom: FetchPixels.getPixelHeight(24)),
-              child: Row(
-                children: [
-                  getAssetImage(modelReview.image ?? '',
-                      width: FetchPixels.getPixelHeight(32),
-                      height: FetchPixels.getPixelHeight(32)),
-                  getHorSpace(FetchPixels.getPixelHeight(6)),
-                  Expanded(
-                    child: getMultilineCustomFont(
-                        modelReview.review ?? "", 12, subtext,
-                        fontWeight: FontWeight.w600,
-                        txtHeight: FetchPixels.getPixelHeight(1.3)),
-                  )
-                ],
+            _buildOverallRating(reviewList), // Display overall rating above the list
+            SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: reviewList.length,
+                itemBuilder: (context, index) {
+                  Review modelReview = reviewList[index];
+                  return _buildReviewItem(modelReview);
+                },
               ),
-            );
-          },
-        )
-      ],
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  Widget _buildOverallRating(List<Review> reviewList) {
+    double overallRating = calculateOverallRating(reviewList);
+
+    return Align(
+      alignment: Alignment.topRight,
+      child: Column(
+        children: [
+          Text(
+            'Overall Rating',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          RatingBar.builder(
+            ignoreGestures: true,
+            initialRating: overallRating,
+            minRating: 1,
+            direction: Axis.horizontal,
+            allowHalfRating: true,
+            itemCount: 5,
+            itemSize: 24,
+            itemBuilder: (context, _) => Icon(
+              Icons.star,
+              color: Colors.amber,
+            ),
+            onRatingUpdate: (rating) {
+              // You can implement further logic here if needed
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewItem(Review modelReview) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: Colors.white,
+            radius: 16,
+            backgroundImage: NetworkImage(modelReview?.profileImageUrl ?? ''),
+          ),
+          SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                modelReview.displayName ?? '',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 4),
+              Text(
+                modelReview.review ?? '',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              SizedBox(
+                width: 100, // Adjust this width as needed
+                child: RatingBar.builder(
+                  ignoreGestures: true,
+                  initialRating: modelReview.rating?.toDouble() ?? 0,
+                  minRating: 1,
+                  direction: Axis.horizontal,
+                  allowHalfRating: true,
+                  itemCount: 5,
+                  itemSize: 16,
+                  itemBuilder: (context, _) => Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
+                  onRatingUpdate: (rating) {
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  double calculateOverallRating(List<Review> reviewList) {
+    if (reviewList.isEmpty) {
+      return 0.0;
+    }
+
+    num totalRating = reviewList.map((review) => review.rating ?? 0).reduce((a, b) => a + b);
+    double overallRating = totalRating / reviewList.length;
+
+    return overallRating.toDouble();
   }
 }

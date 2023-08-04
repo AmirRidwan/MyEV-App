@@ -67,4 +67,18 @@ class FirestoreService {
     }
   }
 
+  Future<void> updateBookingStatus({
+    required String bookingId,
+    required String newStatus,
+  }) async {
+    try {
+      final bookingRef =
+      FirebaseFirestore.instance.collection('bookings').doc(bookingId);
+      await bookingRef.update({'bookingStatus': newStatus});
+    } catch (e) {
+      // Handle the error, if any
+      print('Error updating booking status: $e');
+    }
+  }
+
 }

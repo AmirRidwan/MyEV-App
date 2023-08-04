@@ -413,34 +413,39 @@ class _MapPageState extends State<MapPage> {
                 top: 16.0,
                 left: 16.0,
                 right: 16.0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24.0),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          style: SafeGoogleFont(
-                            'Lato',
-                            fontSize: 16,
-                            color: Colors.black54,
-                          ),
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: 'Search by address',
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 16.0),
-                            border: InputBorder.none,
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(24.0),
+                  color: Colors.white,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24.0),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 16,
+                              color: Colors.black54,
+                            ),
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Search by address',
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 16.0),
+                              border: InputBorder.none,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.search),
-                        onPressed: _searchEVChargingLocation,
-                      ),
-                    ],
+                        IconButton(
+                          icon: Icon(Icons.search),
+                          onPressed: _searchEVChargingLocation,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -448,147 +453,152 @@ class _MapPageState extends State<MapPage> {
                 top: 80.0,
                 left: 16.0,
                 right: 16.0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: _selectedChargerType,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.circular(24.0),
+                  color: Colors.white,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _selectedChargerType,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                              ),
+                              onChanged: (String? value) {
+                                if (value == '') {
+                                  // Clear the filter
+                                  _clearFilters();
+                                } else {
+                                  setState(() {
+                                    _selectedChargerType = value ?? '';
+                                    _updateMarkers();
+                                  });
+                                }
+                              },
+                              items: [
+                                DropdownMenuItem<String>(
+                                  value: '',
+                                  child: Text(
+                                    'All Charger Types',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                DropdownMenuItem<String>(
+                                  value: 'Type 1',
+                                  child: Text(
+                                    'Type 1',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                DropdownMenuItem<String>(
+                                  value: 'Type 2',
+                                  child: Text(
+                                    'Type 2',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                DropdownMenuItem<String>(
+                                  value: 'DC Fast Charging',
+                                  child: Text(
+                                    'DC Fast Charging',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            onChanged: (String? value) {
-                              if (value == '') {
-                                // Clear the filter
-                                _clearFilters();
-                              } else {
-                                setState(() {
-                                  _selectedChargerType = value ?? '';
-                                  _updateMarkers();
-                                });
-                              }
-                            },
-                            items: [
-                              DropdownMenuItem<String>(
-                                value: '',
-                                child: Text(
-                                  'All Charger Types',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              DropdownMenuItem<String>(
-                                value: 'Type 1',
-                                child: Text(
-                                  'Type 1',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              DropdownMenuItem<String>(
-                                value: 'Type 2',
-                                child: Text(
-                                  'Type 2',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              DropdownMenuItem<String>(
-                                value: 'DC Fast Charging',
-                                child: Text(
-                                  'DC Fast Charging',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
                           ),
-                        ),
-                        SizedBox(width: 2.0),
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: _selectedChargingSpeed,
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
+                          SizedBox(width: 2.0),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _selectedChargingSpeed,
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                              ),
+                              onChanged: (String? value) {
+                                if (value == '') {
+                                  // Clear the filter
+                                  _clearFilters();
+                                } else {
+                                  setState(() {
+                                    _selectedChargingSpeed = value ?? '';
+                                    _updateMarkers();
+                                  });
+                                }
+                              },
+                              items: [
+                                DropdownMenuItem<String>(
+                                  value: '',
+                                  child: Text(
+                                    'All Charging Speeds',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                DropdownMenuItem<String>(
+                                  value: 'Slow',
+                                  child: Text(
+                                    'Slow',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                DropdownMenuItem<String>(
+                                  value: 'Medium',
+                                  child: Text(
+                                    'Medium',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                DropdownMenuItem<String>(
+                                  value: 'Fast',
+                                  child: Text(
+                                    'Fast',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            onChanged: (String? value) {
-                              if (value == '') {
-                                // Clear the filter
-                                _clearFilters();
-                              } else {
-                                setState(() {
-                                  _selectedChargingSpeed = value ?? '';
-                                  _updateMarkers();
-                                });
-                              }
-                            },
-                            items: [
-                              DropdownMenuItem<String>(
-                                value: '',
-                                child: Text(
-                                  'All Charging Speeds',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              DropdownMenuItem<String>(
-                                value: 'Slow',
-                                child: Text(
-                                  'Slow',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              DropdownMenuItem<String>(
-                                value: 'Medium',
-                                child: Text(
-                                  'Medium',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                              DropdownMenuItem<String>(
-                                value: 'Fast',
-                                child: Text(
-                                  'Fast',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

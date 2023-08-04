@@ -185,33 +185,38 @@ class _TabHomeState extends State<TabHome> {
   }
 
   Widget _Features({required String image, required String name}) {
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10.0),
-          border: Border.all(color: Colors.grey, width: 2)),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            height: 60,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(image),
+    return Material(
+      elevation: 4,
+      borderRadius: BorderRadius.circular(10.0),
+      color: Colors.white,
+      child: Container(
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10.0),
+            border: Border.all(color: Colors.grey, width: 2)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 60,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(image),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            name,
-            style: SafeGoogleFont(
-              'Lato',
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          )
-        ],
+            SizedBox(height: 10),
+            Text(
+              name,
+              style: SafeGoogleFont(
+                'Lato',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -436,48 +441,57 @@ class _TabHomeState extends State<TabHome> {
                                     ),
                                   );
                                 },
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  width: 190,
-                                  margin: EdgeInsets.only(right: 10),
-                                  decoration: BoxDecoration(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: Material(
+                                    elevation: 4,
+                                    borderRadius: BorderRadius.circular(10.0),
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                        color: Colors.grey, width: 2),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        chargingStation.name,
-                                        style: SafeGoogleFont(
-                                          'Lato',
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
+                                    child: Container(
+                                      padding: EdgeInsets.all(10),
+                                      width: 185,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                            color: Colors.grey, width: 2),
                                       ),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        chargingStation.address,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.black54,
-                                        ),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            chargingStation.name,
+                                            style: SafeGoogleFont(
+                                              'Lato',
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          SizedBox(height: 10),
+                                          Text(
+                                            chargingStation.address,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.black54,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          SizedBox(height: 10),
+                                          // Add some spacing between address and distance
+                                          Text(
+                                            'Distance: ${userLocation != null ? '$distance km' : 'N/A'}',
+                                            // Display the distance or 'N/A' if userLocation is null
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      SizedBox(height: 10),
-                                      // Add some spacing between address and distance
-                                      Text(
-                                        'Distance: ${userLocation != null ? '$distance km' : 'N/A'}',
-                                        // Display the distance or 'N/A' if userLocation is null
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black54,
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                               );
