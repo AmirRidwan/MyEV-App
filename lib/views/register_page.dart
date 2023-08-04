@@ -148,7 +148,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 16),
 
                   // Firstname textfield
                   MyTextField(
@@ -218,7 +218,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     obscureText: true,
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 16),
 
                   // sign in button
                   MyButton(
@@ -226,7 +226,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     onTap: _register,
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 16),
 
                   // already have an account?
                   Row(
