@@ -58,6 +58,8 @@ class _ChargingStationDetailsPageState extends State<ChargingStationDetailsPage>
     return degrees * (pi / 180);
   }
 
+  List<num> ratings = [];
+
   @override
   void initState() {
     tabController = TabController(length: 3, vsync: this);
@@ -160,6 +162,27 @@ class _ChargingStationDetailsPageState extends State<ChargingStationDetailsPage>
           availability = chargingStationData?['availability'] as bool?;
           openText = availability == true ? 'Open' : 'Closed';
         });
+
+        // Fetch reviews and calculate average rating
+        QuerySnapshot reviewsSnapshot = await FirebaseFirestore.instance
+            .collection('reviews')
+            .where('stationId', isEqualTo: widget.stationId)
+            .get();
+
+        if (reviewsSnapshot.docs.isNotEmpty) {
+          double totalRating = 0;
+          for (var reviewDoc in reviewsSnapshot.docs) {
+            totalRating += reviewDoc['rating'];
+          }
+          double averageRating = totalRating / reviewsSnapshot.docs.length;
+          setState(() {
+            ratings = [averageRating]; // Store the calculated average rating
+          });
+        } else {
+          setState(() {
+            ratings = []; // No reviews, so set ratings to an empty list
+          });
+        }
       }
     } catch (e) {
       print('Error fetching charging station data: $e');
@@ -214,6 +237,8 @@ class _ChargingStationDetailsPageState extends State<ChargingStationDetailsPage>
 
   @override
   Widget build(BuildContext context) {
+
+    print("Ratings list: $ratings");
     // Calculate the distance only if the user's location is available
     String distance = userLocation != null
         ? _calculateDistance(
@@ -385,42 +410,39 @@ class _ChargingStationDetailsPageState extends State<ChargingStationDetailsPage>
                                     Row(
                                       children: [
                                         getCustomFont(
-                                            "4.5", 14, Colors.black, 1,
-                                            fontWeight: FontWeight.w500),
-                                        getHorSpace(
-                                            FetchPixels.getPixelHeight(2)),
+                                          "${ratings.isNotEmpty ? ratings[0].toStringAsFixed(1) : 'N/A'}",
+                                          14,
+                                          Colors.black,
+                                          1,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        getHorSpace(FetchPixels.getPixelHeight(2)),
                                         RatingBar(
-                                          initialRating: 4.5,
+                                          initialRating: ratings.isNotEmpty ? ratings[0].toDouble() : 0.0, // Convert num to double
                                           direction: Axis.horizontal,
                                           allowHalfRating: false,
-                                          itemSize:
-                                              FetchPixels.getPixelHeight(16),
+                                          itemSize: FetchPixels.getPixelHeight(16),
                                           itemCount: 5,
                                           ratingWidget: RatingWidget(
                                             full: getSvgImage("like.svg"),
                                             half: getSvgImage("like.svg"),
-                                            empty: getSvgImage(
-                                                "like_unselected.svg"),
+                                            empty: getSvgImage("like_unselected.svg"),
                                           ),
                                           ignoreGestures: true,
                                           itemPadding: EdgeInsets.symmetric(
-                                              horizontal:
-                                                  FetchPixels.getPixelHeight(
-                                                      2)),
+                                            horizontal: FetchPixels.getPixelHeight(2),
+                                          ),
                                           onRatingUpdate: (rating) {},
                                         ),
-                                        getHorSpace(
-                                            FetchPixels.getPixelHeight(8)),
-                                        getSvgImage("person.svg",
-                                            height:
-                                                FetchPixels.getPixelHeight(20),
-                                            width:
-                                                FetchPixels.getPixelHeight(20)),
-                                        getHorSpace(
-                                            FetchPixels.getPixelHeight(2)),
+                                        getHorSpace(FetchPixels.getPixelHeight(8)),
+                                        getSvgImage(
+                                          "person.svg",
+                                          height: FetchPixels.getPixelHeight(20),
+                                          width: FetchPixels.getPixelHeight(20),
+                                        ),
+                                        getHorSpace(FetchPixels.getPixelHeight(2)),
                                         getCustomFont(
                                           '${userLocation != null ? '$distance km' : 'N/A'}',
-                                          // Display the distance in kilometers with 2 decimal places
                                           14,
                                           Colors.black,
                                           1,

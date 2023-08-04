@@ -1,5 +1,5 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:evfinder/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,7 +11,6 @@ import '../../base/widget_utils.dart';
 class FullView extends StatefulWidget {
   final String stationId; // ID of the charging station to display
 
-
   const FullView({Key? key, required this.stationId}) : super(key: key);
 
   @override
@@ -19,7 +18,9 @@ class FullView extends StatefulWidget {
 }
 
 class _FullViewState extends State<FullView> {
-
+  Set<Marker> markers = {};
+  BitmapDescriptor markerIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor markerCarIcon = BitmapDescriptor.defaultMarker;
   int select = 0;
 
   Map<String, dynamic>? chargingStationData;
@@ -54,9 +55,56 @@ class _FullViewState extends State<FullView> {
     });
   }
 
+  void addCustomIcon() {
+    BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(),
+      "assets/images/marker.png",
+    ).then(
+          (icon) {
+        setState(() {
+          markerIcon = icon;
+        });
+      },
+    );
+  }
+
+  void addCustomCarIcon() {
+    BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(200, 200)),
+      "assets/images/CarIcon.png",
+    ).then(
+          (icon) {
+        setState(() {
+          markerCarIcon = icon;
+        });
+      },
+    );
+  }
+
   // Function to draw a polyline between user location and charging station location
-  void _showPolylineOnMap() {
-    if (userLocation != null && chargingStationLocation != null) {
+  void _showPolylineOnMap() async {
+    if (userLocation != null && chargingStationData != null) {
+      GeoPoint chargingStationGeoPoint = chargingStationData?['location'];
+      chargingStationLocation = LatLng(
+        chargingStationGeoPoint.latitude,
+        chargingStationGeoPoint.longitude,
+      );
+
+      // Add markers for user location and charging station location
+      Marker userMarker = Marker(
+        markerId: MarkerId('user_marker'),
+        position: userLocation!,
+        infoWindow: InfoWindow(title: 'Your Location'),
+        icon: markerCarIcon,
+      );
+
+      Marker stationMarker = Marker(
+        markerId: MarkerId('station_marker'),
+        position: chargingStationLocation!,
+        infoWindow: InfoWindow(title: 'Charging Station'),
+        icon: markerIcon
+      );
+
       Polyline polyline = Polyline(
         polylineId: PolylineId('route'),
         color: Colors.blue,
@@ -65,8 +113,37 @@ class _FullViewState extends State<FullView> {
       );
 
       setState(() {
+        polylines.clear(); // Clear existing polylines
         polylines.add(polyline);
+        markers.add(userMarker);
+        markers.add(stationMarker);
       });
+    }
+  }
+
+  LatLngBounds? bounds;
+
+  // Function to calculate the bounds of the polyline
+  void _calculatePolylineBounds() {
+    if (userLocation != null && chargingStationLocation != null) {
+      bounds = LatLngBounds(
+        southwest: LatLng(
+          userLocation!.latitude < chargingStationLocation!.latitude
+              ? userLocation!.latitude
+              : chargingStationLocation!.latitude,
+          userLocation!.longitude < chargingStationLocation!.longitude
+              ? userLocation!.longitude
+              : chargingStationLocation!.longitude,
+        ),
+        northeast: LatLng(
+          userLocation!.latitude > chargingStationLocation!.latitude
+              ? userLocation!.latitude
+              : chargingStationLocation!.latitude,
+          userLocation!.longitude > chargingStationLocation!.longitude
+              ? userLocation!.longitude
+              : chargingStationLocation!.longitude,
+        ),
+      );
     }
   }
 
@@ -74,6 +151,9 @@ class _FullViewState extends State<FullView> {
   void initState() {
     _fetchChargingStationData();
     _getUserLocation();
+    _calculatePolylineBounds();
+    addCustomIcon();
+    addCustomCarIcon();
     super.initState();
   }
 
@@ -111,15 +191,67 @@ class _FullViewState extends State<FullView> {
                         fontWeight: FontWeight.w400,
                         txtHeight: FetchPixels.getPixelHeight(1.5)),
                   ),
-                  getAssetImage("direction.png",
+                  GestureDetector(
+                    onTap: () {
+                      _showPolylineOnMap();
+                      if (polylines.isNotEmpty) {
+                        showModalBottomSheet<dynamic>(
+                          isScrollControlled: true,
+                          isDismissible: true,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+                          ),
+                          backgroundColor: Colors.white,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Wrap(
+                              children: <Widget> [
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        "Get Direction",
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(height: 16),
+                                      Container(
+                                        height: 300,
+                                        width: MediaQuery.of(context).size.width,
+                                        child: GoogleMap(
+                                          initialCameraPosition: CameraPosition(
+                                            target: chargingStationLocation!,
+                                            zoom: 11,
+                                          ),
+                                          polylines: polylines,
+                                          markers: markers,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ]
+                            );
+                          },
+                        );
+                      }
+                    },
+                    child: getAssetImage(
+                      "direction.png",
                       height: FetchPixels.getPixelHeight(52),
-                      width: FetchPixels.getPixelHeight(44)),
+                      width: FetchPixels.getPixelHeight(44),
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
         ),
-
         getVerSpace(FetchPixels.getPixelHeight(50)),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -130,7 +262,11 @@ class _FullViewState extends State<FullView> {
                 getCustomFont("Charger Type", 16, textColor, 1,
                     fontWeight: FontWeight.w500),
                 getVerSpace(FetchPixels.getPixelHeight(8)),
-                getCustomFont(chargingStationData?['chargerType'] ?? 'Loading..', 16, Colors.black, 1,
+                getCustomFont(
+                    chargingStationData?['chargerType'] ?? 'Loading..',
+                    16,
+                    Colors.black,
+                    1,
                     fontWeight: FontWeight.w700)
               ],
             ),
@@ -140,7 +276,11 @@ class _FullViewState extends State<FullView> {
                 getCustomFont("Speed", 16, textColor, 1,
                     fontWeight: FontWeight.w500),
                 getVerSpace(FetchPixels.getPixelHeight(8)),
-                getCustomFont(chargingStationData?['chargingSpeed'] ?? 'Loading..', 16, Colors.black, 1,
+                getCustomFont(
+                    chargingStationData?['chargingSpeed'] ?? 'Loading..',
+                    16,
+                    Colors.black,
+                    1,
                     fontWeight: FontWeight.w700)
               ],
             ),
@@ -150,7 +290,11 @@ class _FullViewState extends State<FullView> {
                 getCustomFont("Price Rate", 16, textColor, 1,
                     fontWeight: FontWeight.w500),
                 getVerSpace(FetchPixels.getPixelHeight(8)),
-                getCustomFont('RM${chargingStationData?['chargingRate'] ?? 'Loading..'}/hour', 16, Colors.black, 1,
+                getCustomFont(
+                    'RM${chargingStationData?['chargingRate'] ?? 'Loading..'}/hour',
+                    16,
+                    Colors.black,
+                    1,
                     fontWeight: FontWeight.w700)
               ],
             )

@@ -79,7 +79,6 @@ class _paidBookingState extends State<paidBooking> {
     }
   }
 
-
   @override
   void initState() {
     super.initState();

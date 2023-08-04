@@ -60,7 +60,8 @@ class _ReviewPageState extends State<ReviewPage> {
             _profileImageUrl = userSnapshot.data()!['profileImageUrl'];
           } else {
             // Use a default profile image URL here
-            _profileImageUrl = 'https://firebasestorage.googleapis.com/v0/b/evfinder-ad6f0.appspot.com/o/default_avatar.png?alt=media&token=aabd68a9-29ce-4f99-9c7b-7b47fae2070a';
+            _profileImageUrl =
+            'https://firebasestorage.googleapis.com/v0/b/evfinder-ad6f0.appspot.com/o/default_avatar.png?alt=media&token=aabd68a9-29ce-4f99-9c7b-7b47fae2070a';
           }
         }
       }
@@ -101,6 +102,10 @@ class _ReviewPageState extends State<ReviewPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Review submitted successfully!')),
           );
+
+          // Navigate back to the previous page
+          Navigator.pop(context);
+
         } else {
           // Handle the case where the user is not logged in
         }

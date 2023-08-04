@@ -179,10 +179,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   Set<Marker> _filteredMarkers = {}; // Store filtered markers
-  List<DocumentSnapshot> _filteredChargingStations =
-      []; // Store filtered charging stations
-  List<LatLng> _polylineCoordinates =
-      []; // Add this line to declare _polylineCoordinates
+  List<DocumentSnapshot> _filteredChargingStations = []; // Store filtered charging stations
+  List<LatLng> _polylineCoordinates = []; // Add this line to declare _polylineCoordinates
 
   void _updateMarkers() {
     List<DocumentSnapshot> filteredStations =
@@ -356,8 +354,7 @@ class _MapPageState extends State<MapPage> {
     return polylineCoordinates;
   }
 
-  Set<Polyline> _polylines =
-      {}; // Add this line to define the _polylines variable
+  Set<Polyline> _polylines = {};
 
   LatLngBounds _getLatLngBounds(LatLng origin, LatLng destination) {
     double south = origin.latitude < destination.latitude
