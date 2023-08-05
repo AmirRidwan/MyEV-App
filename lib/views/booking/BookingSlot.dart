@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/model_booking.dart';
 import '../../utils.dart';
+import 'LeaveReviewPage.dart';
 
 // Create a class to represent the payment methods
 class PaymentMethod {
@@ -42,18 +43,35 @@ class _BookingPageState extends State<BookingPage> {
   String selectedEndTime = '01:00 PM';
   int selectedHours = 1;
   TextEditingController _dateController = TextEditingController();
-
+  String userId = '';
 
 // The currently selected payment method
   PaymentMethod? _selectedPaymentMethod;
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize userId here, either by fetching it or setting it
+    userId = getCurrentUserId();
+  }
+
   void updateSelectedHours(double value) {
     setState(() {
       selectedHours = value.round();
-      int startHour = int.parse(selectedStartTime.split(':')[0]);
-      int endHour = startHour + selectedHours;
+      List<String> startTimeParts = selectedStartTime.split(' ');
+      List<String> timeParts = startTimeParts[0].split(':');
+      int startHour = int.parse(timeParts[0]);
+      String amPm = startTimeParts[1]; // Get AM/PM designation from original start time
+
+      int endHour = (startHour + selectedHours) % 12;
+      if (endHour == 0) {
+        endHour = 12; // Convert 0 to 12 for 12-hour clock
+      }
+
+      String newAmPm = ((startHour + selectedHours) / 12).floor() % 2 == 0 ? amPm : (amPm == 'AM' ? 'PM' : 'AM');
+
       selectedEndTime =
-          '${endHour.toString().padLeft(2, '0')}:00 ${endHour >= 12 ? 'PM' : 'AM'}';
+      '${endHour.toString().padLeft(2, '0')}:00 $newAmPm';
     });
   }
 
@@ -89,27 +107,44 @@ class _BookingPageState extends State<BookingPage> {
       // Update the booking status in Firestore
       await bookingRef.update({'bookingStatus': status});
 
-      // Show a success message to the user if the status is updated to 'Paid'
       if (status == Booking.paidStatus) {
-        showDialog(
+        bool leaveReview = await showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
               title: Text('Booking Successful'),
               content: Text('Your booking has been confirmed.'),
               actions: [
-                ElevatedButton(
+                TextButton(
                   onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pop(
-                        context); // Navigate back to the ChargingStationDetailsPage
+                    Navigator.pop(context, true); // Leave a review
                   },
-                  child: Text('OK'),
+                  child: Text('Leave a Review'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false); // Later
+                  },
+                  child: Text('Later'),
                 ),
               ],
             );
           },
         );
+
+        if (leaveReview == true) {
+          // Navigate to LeaveReviewPage
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReviewPage(bookingId: booking.bookingId,currentUserId: userId ,stationId: widget.stationId),
+            ),
+          );
+        } else {
+          // Navigate back to ChargingStationDetailsPage
+          Navigator.pop(context); // Close the Booking Successful dialog
+          Navigator.pop(context); // Navigate back to ChargingStationDetailsPage
+        }
       } else {
         // Show a message to the user if the booking is canceled
         showDialog(
@@ -153,6 +188,7 @@ class _BookingPageState extends State<BookingPage> {
       );
     }
   }
+
 
   // Simulate payment completion (Replace this with your actual payment processing logic)
   Future<bool?> _simulatePaymentCompletion(

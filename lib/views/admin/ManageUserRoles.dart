@@ -84,20 +84,26 @@ class _ManageUserRoleState extends State<ManageUserRole> {
                         subtitle: Text('Current Role: $currentRole'),
                       ),
                     ),
-                    Container(
-                      width: 120.0,
-                      child: DropdownButtonFormField<String>(
-                        value: currentRole,
-                        items: userRoles.map((String role) {
-                          int index = userRoles.indexOf(role);
-                          return DropdownMenuItem<String>(
-                            value: userRoleValues[index],
-                            child: Text(role),
-                          );
-                        }).toList(),
-                        onChanged: (String? newRole) {
-                          _changeUserRole(displayName, newRole!);
-                        },
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        width: 120.0,
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            enabledBorder: InputBorder.none,
+                          ),
+                          value: currentRole,
+                          items: userRoles.map((String role) {
+                            int index = userRoles.indexOf(role);
+                            return DropdownMenuItem<String>(
+                              value: userRoleValues[index],
+                              child: Text(role),
+                            );
+                          }).toList(),
+                          onChanged: (String? newRole) {
+                            _changeUserRole(displayName, newRole!);
+                          },
+                        ),
                       ),
                     ),
                   ],

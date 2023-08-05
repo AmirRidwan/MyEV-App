@@ -36,112 +36,120 @@ class _MyProfileState extends State<MyProfile> {
         ),
         backgroundColor: Color(0xff9dd1ea),
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        child: StreamBuilder<DocumentSnapshot<Object?>>(
-          stream: FirebaseFirestore.instance.collection('users').doc(user!.uid).snapshots(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Center(child: CircularProgressIndicator());
-            }
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: StreamBuilder<DocumentSnapshot<Object?>>(
+            stream: FirebaseFirestore.instance.collection('users').doc(user!.uid).snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
 
-            final userData = snapshot.data!.data() as Map<String, dynamic>?;
+              final userData = snapshot.data!.data() as Map<String, dynamic>?;
 
-            final profileImageUrl = userData?['profileImageUrl'] as String?;
-            final firstName = userData?['firstName'] as String? ?? '';
-            final lastName = userData?['lastName'] as String? ?? '';
-            final phoneNumber = userData?['phoneNumber'] as String? ?? '';
-            final email = userData?['email'] as String? ?? '';
+              final profileImageUrl = userData?['profileImageUrl'] as String?;
+              final firstName = userData?['firstName'] as String? ?? '';
+              final lastName = userData?['lastName'] as String? ?? '';
+              final phoneNumber = userData?['phoneNumber'] as String? ?? '';
+              final email = userData?['email'] as String? ?? '';
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 15),
-                Center(
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: profileImageUrl != null
-                        ? NetworkImage(profileImageUrl)
-                        : NetworkImage(defaultUrl),
-                    backgroundColor: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 15),
-                _buildProfileField('First Name', firstName),
-                SizedBox(height: 16.0),
-                _buildProfileField('Last Name', lastName),
-                SizedBox(height: 16.0),
-                _buildProfileField('Phone Number', phoneNumber),
-                SizedBox(height: 16.0),
-                _buildProfileField('Email', email),
-                SizedBox(height: 25),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => EditProfile()),
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        backgroundColor: const Color(0xff2d366f),
-                      ),
-                      child: Text(
-                        "Edit Profile",
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Column(
+                      children: [
+                        SizedBox(height: 15),
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundImage: profileImageUrl != null
+                              ? NetworkImage(profileImageUrl)
+                              : NetworkImage(defaultUrl),
+                          backgroundColor: Colors.white,
                         ),
-                      ),
+                        SizedBox(height: 15),
+                        _buildProfileField('First Name', firstName),
+                        SizedBox(height: 16.0),
+                        _buildProfileField('Last Name', lastName),
+                        SizedBox(height: 16.0),
+                        _buildProfileField('Phone Number', phoneNumber),
+                        SizedBox(height: 16.0),
+                        _buildProfileField('Email', email),
+                        SizedBox(height: 25),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => EditProfile()),
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: const Color(0xff2d366f),
+                            ),
+                            child: Text(
+                              "Edit Profile",
+                              style: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
   Widget _buildProfileField(String label, String value) {
-    return Material(
-      elevation: 4,
-      borderRadius: BorderRadius.circular(10),
-      color: Colors.white,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.white),
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: SafeGoogleFont(
-                'Lato',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xff2d366f),
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child: Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.white),
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: SafeGoogleFont(
+                  'Lato',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xff2d366f),
+                ),
               ),
-            ),
-            SizedBox(height: 8.0, width: 356),
-            Text(
-              value,
-              style: SafeGoogleFont(
-                'Lato',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+              SizedBox(height: 8.0, width: 356),
+              Text(
+                value,
+                style: SafeGoogleFont(
+                  'Lato',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../models/model_leave_review.dart';
+import '../home/tab/tab_home.dart';
 
 class ReviewPage extends StatefulWidget {
   final String currentUserId;
@@ -25,8 +26,6 @@ class _ReviewPageState extends State<ReviewPage> {
   late String _bookingId;
   late String _stationId;
   late String _userId;
-  late String _profileImageUrl;
-  late String _displayName;
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -46,24 +45,6 @@ class _ReviewPageState extends State<ReviewPage> {
           _bookingId = widget.bookingId;
           _stationId = bookingSnapshot.data()!['stationId'];
         });
-
-        DocumentSnapshot<Map<String, dynamic>> userSnapshot =
-        await firestore.collection('users').doc(widget.currentUserId).get();
-
-        if (userSnapshot.exists) {
-          setState(() {
-            _displayName = userSnapshot.data()!['displayName'];
-          });
-
-          if (userSnapshot.data()!.containsKey('profileImageUrl') &&
-              userSnapshot.data()!['profileImageUrl'] != null) {
-            _profileImageUrl = userSnapshot.data()!['profileImageUrl'];
-          } else {
-            // Use a default profile image URL here
-            _profileImageUrl =
-            'https://firebasestorage.googleapis.com/v0/b/evfinder-ad6f0.appspot.com/o/default_avatar.png?alt=media&token=aabd68a9-29ce-4f99-9c7b-7b47fae2070a';
-          }
-        }
       }
     } catch (e) {
       print('Error fetching data: $e');
@@ -83,8 +64,6 @@ class _ReviewPageState extends State<ReviewPage> {
             bookingId: _bookingId,
             stationId: _stationId,
             userId: _userId,
-            profileImageUrl: _profileImageUrl,
-            displayName: _displayName,
             rating: _rating,
             review: _reviewController.text,
             timestamp: Timestamp.fromDate(DateTime.now()),
@@ -103,8 +82,11 @@ class _ReviewPageState extends State<ReviewPage> {
             SnackBar(content: Text('Review submitted successfully!')),
           );
 
-          // Navigate back to the previous page
-          Navigator.pop(context);
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => TabHome()), // Replace TabHomePage with the actual name of your TabHome page
+                (route) => false, // Remove all routes from the stack
+          );
 
         } else {
           // Handle the case where the user is not logged in

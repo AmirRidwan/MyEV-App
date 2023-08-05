@@ -85,39 +85,42 @@ class _TabBookingState extends State<TabBooking>
             child: Column(
               children: [
                 SizedBox(height: 20),
-                Material(
-                  elevation: 4,
-                  borderRadius: BorderRadius.circular(14.0),
-                  color: Colors.white,
-                  child: Container(
-                    width: 380,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14.0),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 16,
-                              color: Colors.black54,
-                            ),
-                            controller: searchController,
-                            decoration: InputDecoration(
-                              hintText: 'Search',
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 16.0),
-                              border: InputBorder.none,
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horSpace),
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(14.0),
+                    color: Colors.white,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              style: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 16,
+                                color: Colors.black54,
+                              ),
+                              controller: searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Search',
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16.0),
+                                border: InputBorder.none,
+                              ),
                             ),
                           ),
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.search),
-                          onPressed: () {},
-                        ),
-                      ],
+                          IconButton(
+                            icon: Icon(Icons.search),
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

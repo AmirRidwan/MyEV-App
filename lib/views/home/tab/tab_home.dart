@@ -190,6 +190,8 @@ class _TabHomeState extends State<TabHome> {
       borderRadius: BorderRadius.circular(10.0),
       color: Colors.white,
       child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
         decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10.0),
@@ -237,7 +239,7 @@ class _TabHomeState extends State<TabHome> {
         child: SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,
-            height: 610,
+            height: MediaQuery.of(context).size.height,
             child: Column(
               children: [
                 Material(
@@ -248,7 +250,7 @@ class _TabHomeState extends State<TabHome> {
                   ),
                   child: Container(
                     height: 200,
-                    width: double.infinity,
+                    width: MediaQuery.of(context).size.width,
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
@@ -410,23 +412,19 @@ class _TabHomeState extends State<TabHome> {
                       Padding(
                         padding: EdgeInsets.only(top: 10),
                         child: Container(
-                          height: 150,
+                          height: 212,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: _chargingStationList.length,
                             itemBuilder: (BuildContext context, int index) {
-                              ChargingStation chargingStation =
-                                  _chargingStationList[index];
-
-                              // Calculate the distance only if the user's location is available
+                              ChargingStation chargingStation = _chargingStationList[index];
                               String distance = userLocation != null
                                   ? _calculateDistance(
-                                      userLocation!.latitude,
-                                      userLocation!.longitude,
-                                      chargingStation.latitude,
-                                      chargingStation.longitude,
-                                    ).toStringAsFixed(
-                                      2) // Displaying distance with 2 decimal places
+                                userLocation!.latitude,
+                                userLocation!.longitude,
+                                chargingStation.latitude,
+                                chargingStation.longitude,
+                              ).toStringAsFixed(2)
                                   : 'N/A';
 
                               return GestureDetector(
@@ -434,35 +432,27 @@ class _TabHomeState extends State<TabHome> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (BuildContext context) =>
-                                          ChargingStationDetailsPage(
+                                      builder: (BuildContext context) => ChargingStationDetailsPage(
                                         stationId: chargingStation.stationId,
                                       ),
                                     ),
                                   );
                                 },
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: Material(
+                                child: Container(
+                                  width: 250, // Adjust the width as needed
+                                  child: Card(
                                     elevation: 4,
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    color: Colors.white,
-                                    child: Container(
-                                      padding: EdgeInsets.all(10),
-                                      width: 185,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                            color: Colors.grey, width: 2),
-                                      ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
                                       child: Column(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           Text(
                                             chargingStation.name,
-                                            style: SafeGoogleFont(
-                                              'Lato',
+                                            style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,
                                               color: Colors.black,
@@ -479,10 +469,8 @@ class _TabHomeState extends State<TabHome> {
                                             textAlign: TextAlign.center,
                                           ),
                                           SizedBox(height: 10),
-                                          // Add some spacing between address and distance
                                           Text(
                                             'Distance: ${userLocation != null ? '$distance km' : 'N/A'}',
-                                            // Display the distance or 'N/A' if userLocation is null
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,

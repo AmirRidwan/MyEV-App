@@ -49,27 +49,22 @@ class _EditProfileState extends State<EditProfile> {
     final email = _emailController.text.trim();
 
     try {
+      String displayName = '$firstName $lastName';
+
       // Update the email in Firebase Authentication
       if (email != user?.email) {
         await user?.updateEmail(email);
       }
 
-      // Upload the profile image to Firebase Storage if it has changed
+      String? newProfileImageUrl = _profileImageUrl;
+
+      // Upload the new profile image if it has changed
       if (_profileImage != null) {
         final fileName = '${user!.uid}_profile_image.jpg';
         final destination = 'profile_images/$fileName';
         final storageRef = firebase_storage.FirebaseStorage.instance.ref(destination);
         await storageRef.putFile(_profileImage!);
-        final downloadUrl = await storageRef.getDownloadURL();
-
-        // Delete the previous profile image if it exists
-        if (_profileImageUrl != null) {
-          await firebase_storage.FirebaseStorage.instance.refFromURL(_profileImageUrl!).delete();
-        }
-
-        setState(() {
-          _profileImageUrl = downloadUrl;
-        });
+        newProfileImageUrl = await storageRef.getDownloadURL();
       }
 
       // Update the profile information in Firestore
@@ -78,7 +73,12 @@ class _EditProfileState extends State<EditProfile> {
         'lastName': lastName,
         'phoneNumber': phoneNumber,
         'email': email,
-        'profileImageUrl': _profileImageUrl,
+        'profileImageUrl': newProfileImageUrl,
+        'displayName': displayName, // Update the display name in Firestore
+      });
+
+      setState(() {
+        _profileImageUrl = newProfileImageUrl;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -148,6 +148,7 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
+    print("_profileImageUrl: $_profileImageUrl");
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(

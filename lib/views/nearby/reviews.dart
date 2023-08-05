@@ -14,10 +14,12 @@ class Reviews extends StatefulWidget {
   State<Reviews> createState() => _ReviewsState();
 }
 
+String defaultUrl =
+    'https://firebasestorage.googleapis.com/v0/b/evfinder-ad6f0.appspot.com/o/default_avatar.png?alt=media&token=aabd68a9-29ce-4f99-9c7b-7b47fae2070a';
+
 class _ReviewsState extends State<Reviews> {
   @override
   Widget build(BuildContext context) {
-    FetchPixels(context);
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('reviews')
@@ -37,15 +39,14 @@ class _ReviewsState extends State<Reviews> {
             .toList();
 
         return Padding(
-          padding: const EdgeInsets.only(top: 0, right: 16, bottom: 0, left: 16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               Align(
                 alignment: Alignment.topLeft,
                 child: Text(
                   "Rating & Review",
-                  style: SafeGoogleFont(
-                    'Lato',
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
@@ -92,7 +93,8 @@ class _ReviewsState extends State<Reviews> {
       RatingCount(1, oneStarCount),
     ];
 
-    int totalReviews = reviewList.length; // Calculate the total number of reviews
+    int totalReviews =
+        reviewList.length; // Calculate the total number of reviews
 
     return Column(
       children: [
@@ -100,13 +102,14 @@ class _ReviewsState extends State<Reviews> {
           return Row(
             children: [
               Text(
-                  '${ratingCount.starCount} Star:',
+                '${ratingCount.starCount} Star:',
                 style: SafeGoogleFont('Lato', fontSize: 14),
               ),
               SizedBox(width: 8),
               Expanded(
                 child: LinearProgressIndicator(
-                  value: ratingCount.count / totalReviews, // Use totalReviews here
+                  value: ratingCount.count / totalReviews,
+                  // Use totalReviews here
                   color: Colors.amber,
                   backgroundColor: Colors.grey[300],
                 ),
@@ -136,50 +139,71 @@ class _ReviewsState extends State<Reviews> {
   }
 
   Widget _buildReviewItem(Review modelReview) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          CircleAvatar(
-            backgroundColor: Colors.white,
-            radius: 20,
-            backgroundImage: NetworkImage(modelReview?.profileImageUrl ?? ''),
-          ),
-          SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      future: FirebaseFirestore.instance.collection('users').doc(modelReview.userId).get(),
+      builder: (context, userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+          // Handle the case where user data doesn't exist
+          return SizedBox(); // Return an empty widget or appropriate placeholder
+        }
+
+        var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+        var displayName = userData['displayName'];
+        var profileImageUrl = userData['profileImageUrl'];
+
+        return Container(
+          margin: EdgeInsets.only(bottom: 16),
+          child: Row(
             children: [
-              Text(
-                modelReview.displayName ?? '',
-                style: SafeGoogleFont('Lato', fontSize: 16, fontWeight: FontWeight.bold),
+              CircleAvatar(
+                radius: 20,
+                backgroundImage: profileImageUrl != null && profileImageUrl.isNotEmpty
+                    ? NetworkImage(profileImageUrl)
+                    : NetworkImage(defaultUrl),
+                backgroundColor: Colors.white,
               ),
-              SizedBox(height: 4),
-              Text(
-                  modelReview.review ?? '',
-                  style: SafeGoogleFont('Lato', fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54)
-              ),
-              SizedBox(
-                width: 100, // Adjust this width as needed
-                child: RatingBar.builder(
-                  ignoreGestures: true,
-                  initialRating: modelReview.rating?.toDouble() ?? 0,
-                  minRating: 1,
-                  direction: Axis.horizontal,
-                  allowHalfRating: true,
-                  itemCount: 5,
-                  itemSize: 16,
-                  itemBuilder: (context, _) => Icon(
-                    Icons.star,
-                    color: Colors.amber,
+              SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayName != null && displayName.isNotEmpty ? displayName : 'N/A',
+                    style: SafeGoogleFont('Lato',
+                        fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  onRatingUpdate: (rating) {
-                  },
-                ),
+                  SizedBox(height: 4),
+                  Text(modelReview.review ?? '',
+                      style: SafeGoogleFont('Lato',
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54)),
+                  SizedBox(
+                    width: 100, // Adjust this width as needed
+                    child: RatingBar.builder(
+                      ignoreGestures: true,
+                      initialRating: modelReview.rating?.toDouble() ?? 0,
+                      minRating: 1,
+                      direction: Axis.horizontal,
+                      allowHalfRating: true,
+                      itemCount: 5,
+                      itemSize: 16,
+                      itemBuilder: (context, _) => Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                      ),
+                      onRatingUpdate: (rating) {},
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -188,7 +212,8 @@ class _ReviewsState extends State<Reviews> {
       return 0.0;
     }
 
-    num totalRating = reviewList.map((review) => review.rating ?? 0).reduce((a, b) => a + b);
+    num totalRating =
+        reviewList.map((review) => review.rating ?? 0).reduce((a, b) => a + b);
     double overallRating = totalRating / reviewList.length;
 
     return overallRating.toDouble();

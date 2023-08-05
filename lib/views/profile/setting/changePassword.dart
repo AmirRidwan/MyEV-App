@@ -58,11 +58,18 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           await user.updatePassword(_newPasswordController.text);
 
           // Password changed successfully
-          // You can add a snackbar or a dialog to inform the user
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Password changed successfully!')),
+          );
+
+          // Navigate back to the settings page
+          Navigator.of(context).pop();
         }
       } catch (e) {
         // Handle error here (e.g., incorrect current password, network error, etc.)
-        print("Error changing password: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error changing password: $e')),
+        );
       }
 
       setState(() {
@@ -70,6 +77,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
