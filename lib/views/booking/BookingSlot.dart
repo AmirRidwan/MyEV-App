@@ -17,8 +17,16 @@ List<PaymentMethod> _paymentMethods = [
   PaymentMethod('Credit Card', 'Pay with Credit Card'),
   PaymentMethod('PayPal', 'Pay with PayPal'),
   PaymentMethod('Google Pay', 'Pay with Google Pay'),
-  // Add more payment methods here
+  PaymentMethod('E-Wallet', 'Pay with E-Wallet'),
 ];
+
+Map<String, String> paymentMethodImages = {
+  'Credit Card': 'assets/images/credit_card.png',
+  'PayPal': 'assets/images/paypal.png',
+  'Google Pay': 'assets/images/google_pay.png',
+  'E-Wallet': 'assets/images/e_wallet.png',
+};
+
 
 class BookingPage extends StatefulWidget {
   final String stationId; // ID of the charging station to book
@@ -512,22 +520,33 @@ class _BookingPageState extends State<BookingPage> {
   Widget build(BuildContext context) {
     // Radio button widget for each payment method
     Widget _buildPaymentMethodRadio(PaymentMethod paymentMethod) {
+      String imageAsset = paymentMethodImages[paymentMethod.name] ?? ''; // Get the image asset path
+
       return RadioListTile(
-        title: Text(
-          paymentMethod.name,
-          style: SafeGoogleFont(
-            'Lato',
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black, // Change text color to black
-          ),
+        title: Row(
+          children: [
+            if (imageAsset.isNotEmpty)
+              Image.asset(
+                imageAsset,
+                width: 32,
+                height: 32,
+              ),
+            SizedBox(width: 10),
+            Text(
+              paymentMethod.name,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
         ),
         subtitle: Text(
           paymentMethod.description,
-          style: SafeGoogleFont(
-            'Lato',
+          style: TextStyle(
             fontSize: 14,
-            color: Colors.black54, // Change text color to black
+            color: Colors.black54,
           ),
         ),
         value: paymentMethod,
