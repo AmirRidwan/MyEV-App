@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../controllers/FirestoreService.dart';
 import '../../models/model_booking.dart';
 import '../../utils.dart';
+import 'LeaveReviewPage.dart';
 
 class BookingDetailPage extends StatelessWidget {
   final String bookingId;
@@ -480,84 +481,216 @@ class BookingDetailPage extends StatelessWidget {
                         color: Colors.grey, //color of divider
                         height: 16,
                         thickness: 1),
-                    //Continue Payment Button
-                    if (booking.bookingStatus == 'Unpaid')
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xff2d366f),
-                          ),
-                          onPressed: () {
-                            // Show the confirmation dialog
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return AlertDialog(
-                                  title: Text(
-                                      'Confirm Payment',
-                                    style: SafeGoogleFont(
-                                      'Lato',
-                                      fontSize:  18,
-                                      fontWeight:  FontWeight.bold,
-                                      color:  Colors.black,
-                                    ),
-                                  ),
-                                  content: Text(
-                                    'Are you sure you want to proceed with the payment?',
-                                    style: SafeGoogleFont(
-                                      'Lato',
-                                      fontSize:  16,
-                                      color:  Colors.black54,
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Text(
-                                          'Cancel',
-                                        style: SafeGoogleFont(
-                                          'Lato',
-                                          fontSize:  16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        // Cancel Booking Button
+                        if (booking.bookingStatus == 'Unpaid')
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Colors.red, // Use your desired color
+                            ),
+                            onPressed: () async {
+                              // Show the confirmation dialog
+                              bool confirmCancel = await showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text(
+                                      'Confirm Cancellation',
+                                      style: TextStyle(
+                                        fontFamily: 'Lato',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
                                       ),
                                     ),
-                                    TextButton(
-                                      onPressed: () {
-                                        // Update the booking status to Paid in Firebase
-                                        FirestoreService().updateBookingStatus(
-                                          bookingId: booking.bookingId,
-                                          newStatus: 'Paid',
-                                        );
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: Text(
-                                          'Confirm',
-                                        style: SafeGoogleFont(
-                                          'Lato',
-                                          fontSize:  16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    content: Text(
+                                      'Are you sure you want to cancel this booking?',
+                                      style: TextStyle(
+                                        fontFamily: 'Lato',
+                                        fontSize: 16,
+                                        color: Colors.black54,
                                       ),
                                     ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          child: Text(
-                              'Continue Payment',
-                            style: SafeGoogleFont(
-                                'Lato',
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(false);
+                                        },
+                                        child: Text(
+                                          'No',
+                                          style: TextStyle(
+                                            fontFamily: 'Lato',
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(true);
+                                        },
+                                        child: Text(
+                                          'Yes',
+                                          style: TextStyle(
+                                            fontFamily: 'Lato',
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+
+                              if (confirmCancel == true) {
+                                // Delete the booking from Firestore
+                                await FirestoreService()
+                                    .deleteBooking(booking.bookingId);
+
+                                // Navigate back to the previous screen
+                                Navigator.of(context).pop();
+                              }
+                            },
+                            child: Text(
+                              'Cancel Booking',
+                              style: TextStyle(
+                                fontFamily: 'Lato',
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                        SizedBox(width: 10),
+                        //Continue Payment Button
+                        if (booking.bookingStatus == 'Unpaid')
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xff2d366f),
+                            ),
+                            onPressed: () {
+                              // Show the confirmation dialog
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text(
+                                      'Confirm Payment',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    content: Text(
+                                      'Are you sure you want to proceed with the payment?',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 16,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(
+                                          'Cancel',
+                                          style: SafeGoogleFont(
+                                            'Lato',
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          // Update the booking status to Paid in Firebase
+                                          FirestoreService()
+                                              .updateBookingStatus(
+                                            bookingId: booking.bookingId,
+                                            newStatus: 'Paid',
+                                          );
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(
+                                          'Confirm',
+                                          style: SafeGoogleFont(
+                                            'Lato',
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            child: Text(
+                              'Continue Payment',
+                              style: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    FutureBuilder<bool>(
+                      future: FirestoreService()
+                          .doesReviewExistForBooking(booking.bookingId),
+                      builder: (context, reviewSnapshot) {
+                        if (reviewSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else {
+                          bool reviewExists = reviewSnapshot.data ?? false;
+                          bool canLeaveReview =
+                              booking.bookingStatus == 'Paid' && !reviewExists;
+
+                          if (canLeaveReview) {
+                            return Align(
+                              alignment: Alignment.bottomRight,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xff2d366f),
+                                ),
+                                onPressed: () {
+                                  // Navigate to the review page
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ReviewPage(
+                                          stationId: booking.stationId,
+                                          currentUserId: booking.userId,
+                                          bookingId: bookingId),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  'Leave Review',
+                                  style: SafeGoogleFont(
+                                    'Lato',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            );
+                          } else {
+                            return SizedBox.shrink(); // Hide the button
+                          }
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),

@@ -20,7 +20,8 @@ class Favourite extends StatefulWidget {
   State<Favourite> createState() => _FavouriteState();
 }
 
-class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMixin {
+class _FavouriteState extends State<Favourite>
+    with SingleTickerProviderStateMixin {
   void finish() {
     Navigator.of(context).pop();
   }
@@ -28,13 +29,17 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
   Position? userLocation;
 
   // Helper function to calculate the distance.
-  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  double _calculateDistance(
+      double lat1, double lon1, double lat2, double lon2) {
     const int earthRadius = 6371; // Radius of the earth in km
     double dLat = _degreesToRadians(lat2 - lat1);
     double dLon = _degreesToRadians(lon2 - lon1);
 
     double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_degreesToRadians(lat1)) * cos(_degreesToRadians(lat2)) * sin(dLon / 2) * sin(dLon / 2);
+        cos(_degreesToRadians(lat1)) *
+            cos(_degreesToRadians(lat2)) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
     double distance = earthRadius * c;
 
@@ -60,14 +65,15 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
     }
   }
 
-
   var horSpace = FetchPixels.getPixelHeight(20);
 
   late AnimationController controller;
   late Animation<double> scaleAnimation;
 
-  List<ModelNearByList> favouriteLists = []; // List to store favorite charging stations
-  List<String> favoriteStationIds = []; // List to store favorite station document IDs
+  List<ModelNearByList> favouriteLists =
+      []; // List to store favorite charging stations
+  List<String> favoriteStationIds =
+      []; // List to store favorite station document IDs
 
   @override
   void initState() {
@@ -77,7 +83,8 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    scaleAnimation = CurvedAnimation(parent: controller, curve: Curves.easeInOut);
+    scaleAnimation =
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut);
 
     controller.addListener(() {
       setState(() {});
@@ -118,10 +125,12 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
           .collection('favorites')
           .get();
 
-      List<String> favoriteStationIds = snapshot.docs.map((doc) => doc.id).toList();
+      List<String> favoriteStationIds =
+          snapshot.docs.map((doc) => doc.id).toList();
 
       // Fetch the charging station details using the favorite station IDs
-      List<ModelNearByList> favoriteStations = await _fetchChargingStationData(favoriteStationIds);
+      List<ModelNearByList> favoriteStations =
+          await _fetchChargingStationData(favoriteStationIds);
 
       setState(() {
         favouriteLists = favoriteStations;
@@ -134,7 +143,8 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
   Map<String, dynamic>? stationData;
 
   // Function to fetch charging station data based on station IDs
-  Future<List<ModelNearByList>> _fetchChargingStationData(List<String> stationIds) async {
+  Future<List<ModelNearByList>> _fetchChargingStationData(
+      List<String> stationIds) async {
     List<ModelNearByList> stations = [];
 
     for (String stationId in stationIds) {
@@ -144,7 +154,8 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
           .get();
 
       if (snapshot.exists) {
-        Map<String, dynamic>? stationData = snapshot.data() as Map<String, dynamic>?;
+        Map<String, dynamic>? stationData =
+            snapshot.data() as Map<String, dynamic>?;
         if (stationData != null) {
           ModelNearByList station = ModelNearByList(
             stationData['stationId'] ?? "",
@@ -192,7 +203,10 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
 
       // Unfavorite each charging station
       for (String stationId in favoriteStationIds) {
-        await FirebaseFirestore.instance.collection('charging_stations').doc(stationId).update({
+        await FirebaseFirestore.instance
+            .collection('charging_stations')
+            .doc(stationId)
+            .update({
           'favorites': FieldValue.arrayRemove([userId]),
         });
       }
@@ -218,22 +232,20 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
       favoriteStationIds = snapshot.docs.map((doc) => doc.id).toList();
 
       // Fetch the charging station details using the updated favorite station IDs
-      List<ModelNearByList> favoriteStations = await _fetchChargingStationData(favoriteStationIds);
+      List<ModelNearByList> favoriteStations =
+          await _fetchChargingStationData(favoriteStationIds);
 
       // Update both the list of favorite stations and favorite station IDs
       setState(() {
         favouriteLists = favoriteStations;
       });
-
     } catch (e) {
       print('Error refreshing favorite stations: $e');
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     FetchPixels(context);
     return WillPopScope(
       child: Scaffold(
@@ -247,9 +259,9 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
             "My Favourite",
             style: SafeGoogleFont(
               'Lato',
-              fontSize:  24,
-              fontWeight:  FontWeight.bold,
-              color:  Color(0xff2d366f),
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xff2d366f),
             ),
             textAlign: TextAlign.center,
           ),
@@ -258,171 +270,205 @@ class _FavouriteState extends State<Favourite> with SingleTickerProviderStateMix
         body: SafeArea(
           child: Column(
             children: [
-
               getVerSpace(FetchPixels.getPixelHeight(30)),
-
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: _handleRefresh,
-                  child: ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: horSpace),
-                    itemCount: favouriteLists.length,
-                    primary: true,
-                    shrinkWrap: true,
-                    physics: const BouncingScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      ModelNearByList modelNearBy = favouriteLists[index];
-                      ModelNearByList modelNearByList = favouriteLists[index];
-
-                      // Calculate the distance only if the user's location is available and the station has a valid location
-                      String distance = userLocation != null && modelNearByList.location != null
-                          ? _calculateDistance(
-                        userLocation!.latitude,
-                        userLocation!.longitude,
-                        modelNearByList.location!.latitude,
-                        modelNearByList.location!.longitude,
-                      ).toStringAsFixed(2) // Displaying distance with 2 decimal places
-                          : 'N/A';
-
-                      return Stack(
-                        alignment: Alignment.topRight,
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(
-                                bottom: FetchPixels.getPixelHeight(10)),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(
-                                    FetchPixels.getPixelHeight(12)),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: shadowColor,
-                                      offset: const Offset(0, 7),
-                                      blurRadius: 33)
-                                ]),
-                            child: getPaddingWidget(
-                              EdgeInsets.symmetric(
-                                  horizontal: FetchPixels.getPixelHeight(16)),
-                              Column(
-                                children: [
-                                  getVerSpace(FetchPixels.getPixelHeight(16)),
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      getHorSpace(FetchPixels.getPixelHeight(10)),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                          children: [
-                                            getMultilineCustomFont(
-                                                modelNearBy.name ?? '',
-                                                18,
-                                                Colors.black,
-                                                txtHeight:
-                                                FetchPixels.getPixelHeight(
-                                                    1.5),
-                                                fontWeight: FontWeight.w700,
-                                              fontFamily: "Lato",
-                                            ),
-                                            getVerSpace(
-                                                FetchPixels.getPixelHeight(9)),
-                                            Row(
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                              children: [
-                                                getSvgImage("location.svg",
-                                                    width: FetchPixels
-                                                        .getPixelHeight(19),
-                                                    height: FetchPixels
-                                                        .getPixelHeight(19)),
-                                                getHorSpace(
-                                                    FetchPixels.getPixelHeight(
-                                                        4)),
-                                                Expanded(
-                                                  child: getMultilineCustomFont(
-                                                      modelNearBy.address ?? '',
-                                                      16,
-                                                      Colors.black,
-                                                      fontWeight: FontWeight.w400,
-                                                      txtHeight: FetchPixels
-                                                          .getPixelHeight(1.5),
-                                                    fontFamily: "Lato",
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                            getVerSpace(
-                                                FetchPixels.getPixelHeight(9)),
-                                            Row(
-                                              children: [
-                                                getSvgImage("person.svg",
-                                                    width: FetchPixels
-                                                        .getPixelHeight(19),
-                                                    height: FetchPixels
-                                                        .getPixelHeight(19)),
-                                                getHorSpace(
-                                                    FetchPixels.getPixelHeight(
-                                                        4)),
-                                                getCustomFont(
-                                                    '${userLocation != null ? '$distance km' : 'N/A'}', // Display the distance in kilometers with 2 decimal places
-                                                    16,
-                                                    Colors.black,
-                                                    1,
-                                                    fontWeight: FontWeight.w500,
-                                                  fontFamily: "Lato",
-                                                )
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  getVerSpace(FetchPixels.getPixelHeight(25)),
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                  ),
-                                  getVerSpace(FetchPixels.getPixelHeight(15)),
-                                  getButton(
-                                    context,
-                                    Colors.white,
-                                    "View Detail",
-                                    buttonColor,
-                                        () {
-                                      // Check if the stationId is not null before navigating to the details page
-                                      if (modelNearBy.stationId != null) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => ChargingStationDetailsPage(stationId: modelNearBy.stationId!),
-                                          ),
-                                        );
-                                      } else {
-                                        // Handle the case when the stationId is null (optional)
-                                        // For example, show a toast or a message to inform the user that the station details are not available.
-                                        print('Station ID is null. Details not available.');
-                                      }
-                                    },
-                                    14,
-                                    weight: FontWeight.w700,
-                                    borderColor: buttonColor,
-                                    isBorder: true,
-                                    borderWidth: 1,
-                                    borderRadius: BorderRadius.circular(FetchPixels.getPixelHeight(12)),
-                                    buttonHeight: FetchPixels.getPixelHeight(44),
-                                  ),
-
-                                  getVerSpace(FetchPixels.getPixelHeight(20)),
-                                ],
-                              ),
+                  child: favouriteLists.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No favorite added',
+                            style: SafeGoogleFont(
+                              'Lato',
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
                           ),
-                        ],
-                      );
-                    },
-                  ),
+                        )
+                      : ListView.builder(
+                          padding: EdgeInsets.symmetric(horizontal: horSpace),
+                          itemCount: favouriteLists.length,
+                          primary: true,
+                          shrinkWrap: true,
+                          physics: const BouncingScrollPhysics(),
+                          itemBuilder: (context, index) {
+                            ModelNearByList modelNearBy = favouriteLists[index];
+                            ModelNearByList modelNearByList =
+                                favouriteLists[index];
+
+                            // Calculate the distance only if the user's location is available and the station has a valid location
+                            String distance = userLocation != null &&
+                                    modelNearByList.location != null
+                                ? _calculateDistance(
+                                    userLocation!.latitude,
+                                    userLocation!.longitude,
+                                    modelNearByList.location!.latitude,
+                                    modelNearByList.location!.longitude,
+                                  ).toStringAsFixed(
+                                    2) // Displaying distance with 2 decimal places
+                                : 'N/A';
+
+                            return Stack(
+                              alignment: Alignment.topRight,
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(
+                                      bottom: FetchPixels.getPixelHeight(10)),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                          FetchPixels.getPixelHeight(12)),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: shadowColor,
+                                            offset: const Offset(0, 7),
+                                            blurRadius: 33)
+                                      ]),
+                                  child: getPaddingWidget(
+                                    EdgeInsets.symmetric(
+                                        horizontal:
+                                            FetchPixels.getPixelHeight(16)),
+                                    Column(
+                                      children: [
+                                        getVerSpace(
+                                            FetchPixels.getPixelHeight(16)),
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            getHorSpace(
+                                                FetchPixels.getPixelHeight(10)),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  getMultilineCustomFont(
+                                                    modelNearBy.name ?? '',
+                                                    18,
+                                                    Colors.black,
+                                                    txtHeight: FetchPixels
+                                                        .getPixelHeight(1.5),
+                                                    fontWeight: FontWeight.w700,
+                                                    fontFamily: "Lato",
+                                                  ),
+                                                  getVerSpace(FetchPixels
+                                                      .getPixelHeight(9)),
+                                                  Row(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      getSvgImage(
+                                                          "location.svg",
+                                                          width: FetchPixels
+                                                              .getPixelHeight(
+                                                                  19),
+                                                          height: FetchPixels
+                                                              .getPixelHeight(
+                                                                  19)),
+                                                      getHorSpace(FetchPixels
+                                                          .getPixelHeight(4)),
+                                                      Expanded(
+                                                        child:
+                                                            getMultilineCustomFont(
+                                                          modelNearBy.address ??
+                                                              '',
+                                                          16,
+                                                          Colors.black,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          txtHeight: FetchPixels
+                                                              .getPixelHeight(
+                                                                  1.5),
+                                                          fontFamily: "Lato",
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                  getVerSpace(FetchPixels
+                                                      .getPixelHeight(9)),
+                                                  Row(
+                                                    children: [
+                                                      getSvgImage("person.svg",
+                                                          width: FetchPixels
+                                                              .getPixelHeight(
+                                                                  19),
+                                                          height: FetchPixels
+                                                              .getPixelHeight(
+                                                                  19)),
+                                                      getHorSpace(FetchPixels
+                                                          .getPixelHeight(4)),
+                                                      getCustomFont(
+                                                        '${userLocation != null ? '$distance km' : 'N/A'}',
+                                                        // Display the distance in kilometers with 2 decimal places
+                                                        16,
+                                                        Colors.black,
+                                                        1,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        fontFamily: "Lato",
+                                                      )
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        getVerSpace(
+                                            FetchPixels.getPixelHeight(25)),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                        ),
+                                        getVerSpace(
+                                            FetchPixels.getPixelHeight(15)),
+                                        getButton(
+                                          context,
+                                          Colors.white,
+                                          "View Detail",
+                                          buttonColor,
+                                          () {
+                                            // Check if the stationId is not null before navigating to the details page
+                                            if (modelNearBy.stationId != null) {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ChargingStationDetailsPage(
+                                                          stationId: modelNearBy
+                                                              .stationId!),
+                                                ),
+                                              );
+                                            } else {
+                                              // Handle the case when the stationId is null (optional)
+                                              // For example, show a toast or a message to inform the user that the station details are not available.
+                                              print(
+                                                  'Station ID is null. Details not available.');
+                                            }
+                                          },
+                                          14,
+                                          weight: FontWeight.w700,
+                                          borderColor: buttonColor,
+                                          isBorder: true,
+                                          borderWidth: 1,
+                                          borderRadius: BorderRadius.circular(
+                                              FetchPixels.getPixelHeight(12)),
+                                          buttonHeight:
+                                              FetchPixels.getPixelHeight(44),
+                                        ),
+                                        getVerSpace(
+                                            FetchPixels.getPixelHeight(20)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                 ),
               ),
             ],

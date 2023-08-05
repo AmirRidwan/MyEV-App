@@ -14,6 +14,14 @@ class FirestoreService {
     await bookingsCollection.doc(booking.bookingId).set(booking.toMap());
   }
 
+  Future<void> deleteBooking(String bookingId) async {
+    try {
+      await FirebaseFirestore.instance.collection('bookings').doc(bookingId).delete();
+    } catch (e) {
+      print('Error deleting booking: $e');
+    }
+  }
+
   Stream<Booking> getBookingStream(String bookingId) {
     return FirebaseFirestore.instance
         .collection('bookings')
@@ -36,6 +44,20 @@ class FirestoreService {
       return 'Unknown User';
     } catch (e) {
       return 'Unknown User';
+    }
+  }
+
+  Future<bool> doesReviewExistForBooking(String bookingId) async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> reviewQuerySnapshot =
+      await FirebaseFirestore.instance.collection('reviews')
+          .where('bookingId', isEqualTo: bookingId)
+          .get();
+
+      return reviewQuerySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error checking review existence: $e');
+      return false;
     }
   }
 

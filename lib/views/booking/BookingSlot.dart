@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import '../../controllers/FirestoreService.dart';
 import '../../models/model_booking.dart';
 import '../../utils.dart';
 import 'LeaveReviewPage.dart';
@@ -112,20 +114,41 @@ class _BookingPageState extends State<BookingPage> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text('Booking Successful'),
-              content: Text('Your booking has been confirmed.'),
+              title: Text(
+                  'Booking Successful',
+                style: SafeGoogleFont(
+                  'Lato',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              content: Text(
+                  'Your booking has been confirmed.',
+                style: SafeGoogleFont(
+                  'Lato',
+                  color: Colors.black,
+                ),
+              ),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, true); // Leave a review
                   },
-                  child: Text('Leave a Review'),
+                  child: Text(
+                      'Leave a Review',
+                    style: SafeGoogleFont(
+                      'Lato',
+                    ),
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, false); // Later
                   },
-                  child: Text('Later'),
+                  child: Text(
+                      'Later',
+                    style: SafeGoogleFont('Lato'),
+                  ),
                 ),
               ],
             );
@@ -197,26 +220,279 @@ class _BookingPageState extends State<BookingPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Confirm Booking Details'),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Booking ID: ${booking.bookingId}'),
-              SizedBox(height: 8),
-              Text(
-                  'Selected Date: ${booking.selectedDate.toString().split(' ')[0]}'),
-              SizedBox(height: 8),
-              Text('Start Time: ${booking.startTime}'),
-              SizedBox(height: 8),
-              Text('End Time: ${booking.endTime}'),
-              SizedBox(height: 8),
-              Text('Hours of Charge: ${booking.hoursOfCharge}'),
-              SizedBox(height: 8),
-              Text('Payment Method: ${booking.paymentMethod}'),
-              SizedBox(height: 8),
-              Text('Total Amount: RM${booking.totalAmount.toStringAsFixed(2)}'),
-            ],
+          title: Text(
+              'Confirm Booking Details',
+            style: SafeGoogleFont(
+              'Lato',
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          content: Container(
+            height: 450,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Booking Details Section
+                Column(
+                  children: [
+                    Text(
+                      'Booking Details',
+                      style: SafeGoogleFont(
+                        'Lato',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(
+                  color: Colors.grey, //color of divider
+                  height: 16,
+                  thickness: 1,
+                ),
+                SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.info,
+                      color: Colors.transparent,
+                      size: 20,
+                    ),
+                    SizedBox(width: 16),
+                    Text(
+                      '#${booking.bookingId}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.person_outline_outlined,
+                      color: Colors.black,
+                      size: 20,
+                    ),
+                    SizedBox(width: 16),
+                    Text(
+                      '${booking.customerName ?? 'Unknown'}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                FutureBuilder<Map<String, String>>(
+                  future: FirestoreService()
+                      .getChargingStationDetails(booking.stationId),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return Text('Location: Loading...');
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      String chargingStationName = snapshot.data!['name'] ??
+                          'Unknown Charging Station';
+                      String chargingStationAddress =
+                          snapshot.data!['address'] ?? 'Unknown Address';
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                color: Colors.black,
+                                size: 20,
+                              ),
+                              SizedBox(width: 16),
+                              Text(
+                                chargingStationName,
+                                style: SafeGoogleFont(
+                                  'Lato',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                color: Colors.transparent,
+                                size: 20,
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  chargingStationAddress,
+                                  style: SafeGoogleFont('Lato',
+                                      fontSize: 14, color: Colors.grey),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+                  },
+                ),
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_month_outlined,
+                      color: Colors.black,
+                      size: 20,
+                    ),
+                    SizedBox(width: 16),
+                    // Add some space between the icon and the text
+                    Text(
+                      '${DateFormat('EEEE, dd MMM').format(booking.selectedDate)}',
+                      style: SafeGoogleFont(
+                        'Lato',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time,
+                      color: Colors.black,
+                      size: 20,
+                    ),
+                    SizedBox(width: 16),
+                    Text(
+                      '${booking.startTime} - ${booking.endTime}',
+                      style: SafeGoogleFont(
+                        'Lato',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.hourglass_bottom_outlined,
+                      color: Colors.black,
+                      size: 20,
+                    ),
+                    SizedBox(width: 16),
+                    Text(
+                      '${booking.hoursOfCharge} hours',
+                      style: SafeGoogleFont(
+                        'Lato',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+
+                // Payment Section
+                Theme(
+                  data: Theme.of(context)
+                      .copyWith(dividerColor: Colors.transparent),
+                  child: ListTileTheme(
+                    contentPadding: EdgeInsets.all(0),
+                    child: ExpansionTile(
+                      initiallyExpanded: true,
+                      textColor: Colors.black,
+                      iconColor: Colors.grey,
+                      title: Row(
+                        children: [
+                          Icon(
+                            Icons.monetization_on_outlined,
+                            color: Colors.black,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Payment',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Payment Method',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${booking.paymentMethod}',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Total Amount',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    'RM${booking.totalAmount.toStringAsFixed(2)}',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 16),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Divider(
+                    color: Colors.grey, //color of divider
+                    height: 16,
+                    thickness: 1),
+              ],
+            ),
           ),
           actions: [
             ElevatedButton(
@@ -224,14 +500,30 @@ class _BookingPageState extends State<BookingPage> {
                 // Continue with the payment
                 Navigator.pop(context, true);
               },
-              child: Text('Continue Payment'),
+              child: Text(
+                  'Continue Payment',
+                style: SafeGoogleFont(
+                  'Lato',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
                 // Cancel the booking
                 Navigator.pop(context, false);
               },
-              child: Text('Cancel Booking'),
+              child: Text(
+                  'Cancel Booking',
+                style: SafeGoogleFont(
+                  'Lato',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ],
         );

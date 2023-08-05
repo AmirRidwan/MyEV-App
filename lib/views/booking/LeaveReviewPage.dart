@@ -1,9 +1,10 @@
+import 'package:evfinder/views/home/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../models/model_leave_review.dart';
-import '../home/tab/tab_home.dart';
+import '../../utils.dart';
 
 class ReviewPage extends StatefulWidget {
   final String currentUserId;
@@ -84,7 +85,7 @@ class _ReviewPageState extends State<ReviewPage> {
 
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => TabHome()), // Replace TabHomePage with the actual name of your TabHome page
+            MaterialPageRoute(builder: (context) => HomePage()), // Replace TabHomePage with the actual name of your TabHome page
                 (route) => false, // Remove all routes from the stack
           );
 
@@ -109,7 +110,22 @@ class _ReviewPageState extends State<ReviewPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Leave a Review'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xff2d366f)),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        centerTitle: true,
+        title: Text(
+          "Edit Profile",
+          style: SafeGoogleFont(
+            'Lato',
+            fontSize:  24,
+            fontWeight:  FontWeight.bold,
+            color:  Color(0xff2d366f),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        backgroundColor: const Color(0xff9dd1ea),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -118,10 +134,23 @@ class _ReviewPageState extends State<ReviewPage> {
           children: [
             Text(
               'Leave a Review',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: SafeGoogleFont(
+                  'Lato',
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
             SizedBox(height: 16),
-            Text('Select your rating:'),
+            Text(
+                'Select your rating:',
+              style: SafeGoogleFont(
+                'Lato',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

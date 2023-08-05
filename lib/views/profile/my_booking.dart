@@ -1,4 +1,3 @@
-import 'package:evfinder/views/booking/bookingDetail.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../base/color_data.dart';
 import '../../utils.dart';
+import '../booking/bookingDetail.dart';
 
 // Enum to represent the sorting options
 enum SortingOption {
@@ -31,28 +31,61 @@ class _MyBookingState extends State<MyBooking> {
   // List to store booking data
   List<Map<String, dynamic>> bookingData = [];
   Map<String, String?> chargingStationNames = {};
+  Map<String, String?> chargingStationAddresses = {};
+
+  Future<void> _fetchChargingStationAddresses() async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> snapshot =
+      await firestore.collection('charging_stations').get();
+      if (snapshot.docs.isNotEmpty) {
+        chargingStationAddresses = Map.fromIterable(snapshot.docs,
+            key: (doc) => doc.id,
+            value: (doc) => doc.data()?['address'] as String?);
+      }
+    } catch (e) {
+      print('Error fetching charging station addresses: $e');
+    }
+  }
 
   // Method to fetch booking data from Firestore
   Future<void> _fetchBookingData() async {
     try {
-      QuerySnapshot<Map<String, dynamic>> snapshot = await firestore
+      QuerySnapshot<Map<String, dynamic>> bookingSnapshot = await firestore
           .collection('bookings')
           .where('userId', isEqualTo: widget.currentUserId)
           .get();
-      if (snapshot.docs.isNotEmpty) {
+
+      if (bookingSnapshot.docs.isNotEmpty) {
+        List<Map<String, dynamic>> allBookings = [];
+
+        for (var bookingDoc in bookingSnapshot.docs) {
+          final bookingData = bookingDoc.data()! as Map<String, dynamic>;
+          bookingData['bookingId'] = bookingDoc.id;
+          bookingData['bookingDateTime'] =
+              (bookingData['bookingTimestamp'] as Timestamp?)?.toDate() ??
+                  DateTime.now();
+          bookingData['selectedDate'] =
+              (bookingData['selectedDate'] as Timestamp?)?.toDate();
+
+          QuerySnapshot<Map<String, dynamic>> reviewQuerySnapshot =
+          await firestore.collection('reviews')
+              .where('bookingId', isEqualTo: bookingDoc.id)
+              .get();
+
+          bookingData['reviewExists'] = reviewQuerySnapshot.docs.isNotEmpty;
+
+          allBookings.add(bookingData);
+        }
+
         setState(() {
-          bookingData = snapshot.docs.map((doc) {
-            final data = doc.data()! as Map<String, dynamic>;
-            data['bookingId'] = doc.id; // Assign the document ID to 'bookingId'
-            data['bookingDateTime'] = (data['bookingTimestamp'] as Timestamp?)?.toDate() ?? DateTime.now();
-            return data;
-          }).toList();
+          bookingData = allBookings;
         });
       }
     } catch (e) {
       print('Error fetching booking data: $e');
     }
   }
+
 
   // Method to handle the refresh action
   Future<void> _refreshBookingData() async {
@@ -146,7 +179,8 @@ class _MyBookingState extends State<MyBooking> {
     super.initState();
     _fetchBookingData();
     _fetchChargingStationNames();
-    _sortBookingData(); // Sort the data initially
+    _fetchChargingStationAddresses();
+    _sortBookingData();
 
   }
 
@@ -163,9 +197,9 @@ class _MyBookingState extends State<MyBooking> {
           "My Booking",
           style: SafeGoogleFont(
             'Lato',
-            fontSize:  24,
-            fontWeight:  FontWeight.bold,
-            color:  Color(0xff2d366f),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xff2d366f),
           ),
           textAlign: TextAlign.center,
         ),
@@ -175,15 +209,26 @@ class _MyBookingState extends State<MyBooking> {
         onRefresh: () async {
           await _refreshBookingData(); // Trigger refresh when pulled down
           await _fetchChargingStationNames(); // Update charging station names
+          await _fetchChargingStationAddresses();
         },
         child: bookingData.isEmpty
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+          child: Text(
+            'No booking history found',
+            style: SafeGoogleFont(
+              'Lato',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black54,
+            ),
+          ),
+        )
             : ListView.builder(
           itemCount: bookingData.length,
           itemBuilder: (context, index) {
             Map<String, dynamic> booking = bookingData[index];
             String? chargingStationName = chargingStationNames[booking['stationId']];
-
+            String? chargingStationAddress = chargingStationAddresses[booking['stationId']];
             // Determine the color based on the 'bookingStatus' value
             Color statusColor = booking['bookingStatus'].toLowerCase() == 'paid'
                 ? Colors.green
@@ -191,19 +236,19 @@ class _MyBookingState extends State<MyBooking> {
 
             return Padding(
               padding: const EdgeInsets.all(8.0),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(
-                      builder: (BuildContext context){
-                        return BookingDetailPage(bookingId: bookingData[index]['bookingId']);
-                      }
-                  ),
-                  );
-                },
-                child: Material(
-                  elevation: 4,
-                  borderRadius: BorderRadius.circular(10),
-                  color: Colors.white,
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+                child: GestureDetector(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (BuildContext context){
+                          return BookingDetailPage(bookingId: bookingData[index]['bookingId']);
+                        }
+                    ),
+                    );
+                  },
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -212,109 +257,180 @@ class _MyBookingState extends State<MyBooking> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Text(
-                              '${chargingStationName ?? 'N/A'}',
-                              style: SafeGoogleFont(
-                                'Lato',
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Text(
-                                'Status: ',
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 14,
-                                  color: Colors.black54,
+                      child: Container(
+                        height: 212,
+                        width: MediaQuery.of(context).size.width,
+                        child: Row(
+                          children: [
+                            SizedBox(width: 5),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '${DateFormat('MMM').format(booking['selectedDate'])}',
+                                  style: SafeGoogleFont('Lato', fontSize: 14),
                                 ),
-                              ),
-                              Text(
-                                '${booking['bookingStatus']}',
-                                style: SafeGoogleFont(
-                                  'Lato',
-                                  fontSize: 14,
-                                  color: statusColor,
+                                SizedBox(height: 2),
+                                Text(
+                                  '${DateFormat('dd').format(booking['selectedDate'])}',
+                                  style: SafeGoogleFont('Lato', fontSize: 14, fontWeight: FontWeight.bold),
                                 ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Date: ${DateFormat('yyyy-MM-dd').format(booking['bookingDateTime'])}',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 14,
-                              color: Colors.black54,
+                                SizedBox(height: 2),
+                                Text(
+                                  '${DateFormat('E').format(booking['selectedDate'])}',
+                                  style: SafeGoogleFont('Lato', fontSize: 14),
+                                ),
+                              ],
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Time: ${DateFormat('HH:mm').format(booking['bookingDateTime'])}',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 14,
-                              color: Colors.black54,
+                            SizedBox(width: 10),
+                            VerticalDivider(
+                              color: Colors.grey[350],
+                              width: 24,
+                              thickness: 1,
+                              indent: 36,
+                              endIndent: 36,
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Start Time: ${booking['startTime']}',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 14,
-                              color: Colors.black54,
+                            SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Center(
+                                  child: Text(
+                                    '${chargingStationName ?? 'N/A'}',
+                                    style: SafeGoogleFont(
+                                      'Lato',
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Container(
+                                  width: 260,
+                                  child: Expanded(
+                                    child: Text(
+                                      '${chargingStationAddress ?? 'N/A'}',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
+                                      softWrap: true,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      '${booking['startTime']} - ${booking['endTime']}',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.hourglass_bottom,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      '${booking['hoursOfCharge']} hours',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.payment,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      ' ${booking['paymentMethod']}',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.assignment_turned_in_outlined,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'Status: ',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${booking['bookingStatus']}',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 14,
+                                        color: statusColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.monetization_on_outlined,
+                                      color: Colors.black,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      'RM${booking['totalAmount'].toStringAsFixed(2)}',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    SizedBox(width: 60),
+                                  ],
+                                ),
+                              ],
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'End Time: ${booking['endTime']}',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 14,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Hours of Charge: ${booking['hoursOfCharge']}',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 14,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Payment Method: ${booking['paymentMethod']}',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 14,
-                              color: Colors.black54,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: Text(
-                              'Total Amount: RM${booking['totalAmount'].toStringAsFixed(2)}',
-                              style: SafeGoogleFont(
-                                'Lato',
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
