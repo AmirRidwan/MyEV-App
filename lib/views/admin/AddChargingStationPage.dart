@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 import '../../utils.dart';
 
@@ -58,6 +61,45 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
     }).toList();
   }
 
+  List<XFile> _selectedImages = [];
+
+  Future<void> _selectImages() async {
+    if (_selectedImages.length >= 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('You have reached the maximum limit of 4 photos.')),
+      );
+      return;
+    }
+
+    List<XFile>? images = await ImagePicker().pickMultiImage();
+    if (images != null) {
+      // Calculate the number of images that can be added
+      int remainingSlots = 4 - _selectedImages.length;
+
+      // Add images up to the remaining available slots
+      _selectedImages.addAll(images.take(remainingSlots));
+
+      setState(() {
+        // Update the state with the new selected images
+      });
+    }
+  }
+
+  Future<void> _uploadPhotos(List<XFile> imageFiles, String stationId) async {
+    List<String> uploadedPhotoUrls = [];
+
+    for (var imageFile in imageFiles) {
+      Reference storageRef = FirebaseStorage.instance.ref().child('charging_station_photos/$stationId/${DateTime.now().toString()}.jpg');
+      UploadTask uploadTask = storageRef.putFile(File(imageFile.path));
+      TaskSnapshot snapshot = await uploadTask.whenComplete(() => null);
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      uploadedPhotoUrls.add(downloadUrl);
+    }
+    await FirebaseFirestore.instance.collection('charging_stations').doc(stationId).update({
+      'images': uploadedPhotoUrls,
+    });
+  }
+
   Future<void> _addChargingStation() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -74,7 +116,7 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
 
     try {
       DocumentReference docRef =
-          await FirebaseFirestore.instance.collection('charging_stations').add({
+      await FirebaseFirestore.instance.collection('charging_stations').add({
         'name': name,
         'address': address,
         'location': location,
@@ -83,10 +125,12 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
         'chargingSpeed': _chargingSpeed,
         'operationHour': operationHour,
         'chargingRate': chargingRate,
+        'images': [],
       });
 
       String stationId = docRef.id;
 
+      await _uploadPhotos(_selectedImages, stationId);
       await docRef.update({
         'stationId': stationId,
       });
@@ -142,272 +186,281 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
             elevation: 4,
             borderRadius: BorderRadius.circular(10),
             color: Colors.white,
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Name',
-                        labelStyle: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 16,
-                          color: Colors.grey,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Name',
+                          labelStyle: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: Icon(Icons.person),
                         ),
-                        prefixIcon: Icon(Icons.person),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter a name';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter a name';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 10.0),
-                    TextFormField(
-                      controller: _addressController,
-                      decoration: InputDecoration(
-                        labelText: 'Address',
-                        labelStyle: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 16,
-                          color: Colors.grey,
+                      SizedBox(height: 10.0),
+                      TextFormField(
+                        controller: _addressController,
+                        decoration: InputDecoration(
+                          labelText: 'Address',
+                          labelStyle: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: Icon(Icons.location_on),
                         ),
-                        prefixIcon: Icon(Icons.location_on),
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter an address';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter an address';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 10.0),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _latitudeController,
-                            decoration: InputDecoration(
-                              labelText: 'Latitude',
-                              labelStyle: SafeGoogleFont(
+                      SizedBox(height: 10.0),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _latitudeController,
+                              decoration: InputDecoration(
+                                labelText: 'Latitude',
+                                labelStyle: SafeGoogleFont(
+                                  'Lato',
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                                prefixIcon: Icon(Icons.map),
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Please enter a latitude';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          SizedBox(width: 10.0),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _longitudeController,
+                              decoration: InputDecoration(
+                                labelText: 'Longitude',
+                                labelStyle: SafeGoogleFont(
+                                  'Lato',
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                ),
+                                prefixIcon: Icon(Icons.map),
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Please enter a longitude';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10.0),
+                      SwitchListTile(
+                        title: Text('Availability'),
+                        value: _availability,
+                        onChanged: (bool value) {
+                          setState(() {
+                            _availability = value;
+                          });
+                        },
+                      ),
+                      SizedBox(height: 10.0),
+                      DropdownButtonFormField<String>(
+                        value: _chargerType,
+                        decoration: InputDecoration(
+                          labelText: 'Charger Type',
+                          labelStyle: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: Icon(Icons.ev_station),
+                        ),
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: null,
+                            child: Text(
+                              'Select a charger type',
+                              style: SafeGoogleFont(
                                 'Lato',
                                 fontSize: 16,
                                 color: Colors.grey,
                               ),
-                              prefixIcon: Icon(Icons.map),
                             ),
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter a latitude';
-                              }
-                              return null;
-                            },
                           ),
+                          ..._buildDropdownMenuItems(_chargerTypes),
+                        ],
+                        onChanged: (String? value) {
+                          setState(() {
+                            _chargerType = value;
+                          });
+                        },
+                      ),
+                      SizedBox(height: 10.0),
+                      DropdownButtonFormField<String>(
+                        value: _chargingSpeed,
+                        decoration: InputDecoration(
+                          labelText: 'Charging Speed',
+                          labelStyle: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: Icon(Icons.flash_on),
                         ),
-                        SizedBox(width: 10.0),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _longitudeController,
-                            decoration: InputDecoration(
-                              labelText: 'Longitude',
-                              labelStyle: SafeGoogleFont(
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: null,
+                            child: Text(
+                              'Select a charging speed',
+                              style: SafeGoogleFont(
                                 'Lato',
                                 fontSize: 16,
                                 color: Colors.grey,
                               ),
-                              prefixIcon: Icon(Icons.map),
-                            ),
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter a longitude';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10.0),
-                    SwitchListTile(
-                      title: Text('Availability'),
-                      value: _availability,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _availability = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 10.0),
-                    DropdownButtonFormField<String>(
-                      value: _chargerType,
-                      decoration: InputDecoration(
-                        labelText: 'Charger Type',
-                        labelStyle: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                        prefixIcon: Icon(Icons.ev_station),
-                      ),
-                      items: [
-                        DropdownMenuItem<String>(
-                          value: null,
-                          child: Text(
-                            'Select a charger type',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 16,
-                              color: Colors.grey,
                             ),
                           ),
-                        ),
-                        ..._buildDropdownMenuItems(_chargerTypes),
-                      ],
-                      onChanged: (String? value) {
-                        setState(() {
-                          _chargerType = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 10.0),
-                    DropdownButtonFormField<String>(
-                      value: _chargingSpeed,
-                      decoration: InputDecoration(
-                        labelText: 'Charging Speed',
-                        labelStyle: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                        prefixIcon: Icon(Icons.flash_on),
+                          ..._buildDropdownMenuItems(_chargingSpeeds),
+                        ],
+                        onChanged: (String? value) {
+                          setState(() {
+                            _chargingSpeed = value;
+                          });
+                        },
                       ),
-                      items: [
-                        DropdownMenuItem<String>(
-                          value: null,
-                          child: Text(
-                            'Select a charging speed',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 16,
-                              color: Colors.grey,
+                      SizedBox(height: 10.0),
+                      DropdownButtonFormField<String>(
+                        value: _openingTime,
+                        decoration: InputDecoration(
+                          labelText: 'Opening Time',
+                          labelStyle: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: Icon(Icons.access_time),
+                        ),
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: null,
+                            child: Text(
+                              'Select opening time',
+                              style: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
-                        ),
-                        ..._buildDropdownMenuItems(_chargingSpeeds),
-                      ],
-                      onChanged: (String? value) {
-                        setState(() {
-                          _chargingSpeed = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 10.0),
-                    DropdownButtonFormField<String>(
-                      value: _openingTime,
-                      decoration: InputDecoration(
-                        labelText: 'Opening Time',
-                        labelStyle: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                        prefixIcon: Icon(Icons.access_time),
+                          ..._buildDropdownMenuItems(_operationHours),
+                        ],
+                        onChanged: (String? value) {
+                          setState(() {
+                            _openingTime = value;
+                          });
+                        },
                       ),
-                      items: [
-                        DropdownMenuItem<String>(
-                          value: null,
-                          child: Text(
-                            'Select opening time',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 16,
-                              color: Colors.grey,
+                      SizedBox(height: 10.0),
+                      DropdownButtonFormField<String>(
+                        value: _closingTime,
+                        decoration: InputDecoration(
+                          labelText: 'Closing Time',
+                          labelStyle: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: Icon(Icons.access_time),
+                        ),
+                        items: [
+                          DropdownMenuItem<String>(
+                            value: null,
+                            child: Text(
+                              'Select closing time',
+                              style: SafeGoogleFont(
+                                'Lato',
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
-                        ),
-                        ..._buildDropdownMenuItems(_operationHours),
-                      ],
-                      onChanged: (String? value) {
-                        setState(() {
-                          _openingTime = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 10.0),
-                    DropdownButtonFormField<String>(
-                      value: _closingTime,
-                      decoration: InputDecoration(
-                        labelText: 'Closing Time',
-                        labelStyle: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                        prefixIcon: Icon(Icons.access_time),
+                          ..._buildDropdownMenuItems(_operationHours),
+                        ],
+                        onChanged: (String? value) {
+                          setState(() {
+                            _closingTime = value;
+                          });
+                        },
                       ),
-                      items: [
-                        DropdownMenuItem<String>(
-                          value: null,
-                          child: Text(
-                            'Select closing time',
-                            style: SafeGoogleFont(
-                              'Lato',
-                              fontSize: 16,
-                              color: Colors.grey,
-                            ),
+                      SizedBox(height: 10.0),
+                      TextFormField(
+                        controller: _chargingRateController,
+                        decoration: InputDecoration(
+                          labelText: 'Charging Rate (per hour)',
+                          labelStyle: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                          prefixIcon: Icon(Icons.attach_money),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter the charging rate per hour';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 10.0),
+                      ElevatedButton(
+                        onPressed: _selectImages,
+                        child: Text('Upload Photos (Max 4)'),
+                      ),
+                      SizedBox(height: 20.0),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Color(0xff2d366f),
+                        ),
+                        onPressed: _addChargingStation,
+                        child: Text(
+                          'Add Charging Station',
+                          style: SafeGoogleFont(
+                            'Lato',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
-                        ..._buildDropdownMenuItems(_operationHours),
-                      ],
-                      onChanged: (String? value) {
-                        setState(() {
-                          _closingTime = value;
-                        });
-                      },
-                    ),
-                    SizedBox(height: 10.0),
-                    TextFormField(
-                      controller: _chargingRateController,
-                      decoration: InputDecoration(
-                        labelText: 'Charging Rate (per hour)',
-                        labelStyle: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                        prefixIcon: Icon(Icons.attach_money),
                       ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter the charging rate per hour';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20.0),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Color(0xff2d366f),
-                      ),
-                      onPressed: _addChargingStation,
-                      child: Text(
-                        'Add Charging Station',
-                        style: SafeGoogleFont(
-                          'Lato',
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

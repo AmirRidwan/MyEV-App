@@ -29,7 +29,7 @@ class _StationRoadmapState extends State<StationRoadmap> {
 
   // Define the maximum distance (in meters) to consider a charging station as near the route.
   static const double maxDistanceToRoute =
-  1000.0; // Adjust this value as needed.
+  400.0; // Adjust this value as needed.
 
   // Custom markers for origin, destination, and charging stations.
   BitmapDescriptor? originMarker;

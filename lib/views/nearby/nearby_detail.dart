@@ -516,7 +516,8 @@ class _ChargingStationDetailsPageState extends State<ChargingStationDetailsPage>
           FullView(stationId: chargingStationData!['stationId']),
         if (chargingStationData != null)
           Reviews(stationId: chargingStationData!['stationId']),
-        Photos(),
+        if (chargingStationData != null)
+        Photos(stationId: chargingStationData!['stationId']),
       ],
       onPageChanged: (value) {
         setState(() {
@@ -543,7 +544,7 @@ class _ChargingStationDetailsPageState extends State<ChargingStationDetailsPage>
             borderRadius:
                 BorderRadius.circular(FetchPixels.getPixelHeight(12))),
         child: TabBar(
-          indicatorColor: Colors.white,
+          indicatorColor: Colors.transparent,
           onTap: (index) {
             _controller.animateToPage(
               index,

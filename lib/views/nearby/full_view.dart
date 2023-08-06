@@ -101,7 +101,7 @@ class _FullViewState extends State<FullView> {
       Marker stationMarker = Marker(
         markerId: MarkerId('station_marker'),
         position: chargingStationLocation!,
-        infoWindow: InfoWindow(title: 'Charging Station'),
+        infoWindow: InfoWindow(title: chargingStationData?['address'] ?? 'Loading..'),
         icon: markerIcon
       );
 
@@ -166,8 +166,7 @@ class _FullViewState extends State<FullView> {
       shrinkWrap: true,
       physics: const BouncingScrollPhysics(),
       children: [
-        getVerSpace(FetchPixels.getPixelHeight(50)),
-        getCustomFont("ADDRESS", 16, textColor, 1, fontWeight: FontWeight.w500),
+        getCustomFont("ADDRESS", 14, textColor, 1, fontWeight: FontWeight.w500),
         getVerSpace(FetchPixels.getPixelHeight(8)),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -224,11 +223,12 @@ class _FullViewState extends State<FullView> {
                                         height: 300,
                                         width: MediaQuery.of(context).size.width,
                                         child: GoogleMap(
+                                          zoomGesturesEnabled: false,
+                                          zoomControlsEnabled: false,
                                           initialCameraPosition: CameraPosition(
                                             target: chargingStationLocation!,
-                                            zoom: 11,
+                                            zoom: 14,
                                           ),
-                                          polylines: polylines,
                                           markers: markers,
                                         ),
                                       ),

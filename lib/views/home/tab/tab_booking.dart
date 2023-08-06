@@ -1,11 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 import '../../../base/color_data.dart';
 import '../../../base/constant.dart';
 import '../../../base/resizer/fetch_pixels.dart';
 import '../../../base/widget_utils.dart';
 import '../../../utils.dart';
+import '../../booking/bookingDetail.dart';
 import '../../booking/paidBooking.dart';
 import '../../booking/historyBooking.dart';
 import '../../booking/unpaidBooking.dart';
@@ -19,11 +22,16 @@ class TabBooking extends StatefulWidget {
 
 class _TabBookingState extends State<TabBooking>
     with SingleTickerProviderStateMixin {
+  CollectionReference stationsCollection =
+  FirebaseFirestore.instance.collection('charging_stations');
+  CollectionReference bookingsCollection =
+  FirebaseFirestore.instance.collection('bookings');
+  bool isTyping = false;
   var horSpace = FetchPixels.getPixelHeight(20);
   TextEditingController searchController = TextEditingController();
   var select = 0;
 
-  onItemChanged(String value) {
+  onItemChanged() {
     // Implement the item change logic here
   }
 
@@ -100,24 +108,119 @@ class _TabBookingState extends State<TabBooking>
                       child: Row(
                         children: [
                           Expanded(
-                            child: TextField(
-                              style: SafeGoogleFont(
-                                'Lato',
-                                fontSize: 16,
-                                color: Colors.black54,
+                            child:
+                            TypeAheadField(
+                              textFieldConfiguration: TextFieldConfiguration(
+                                onChanged: (text) {
+                                  setState(() {
+                                    isTyping = text.isNotEmpty;
+                                  });
+                                },
+                                controller: searchController,
+                                style: TextStyle(
+                                  fontFamily: 'Lato',
+                                  fontSize: 16,
+                                  color: Colors.black54,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: 'Search',
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                                  border: InputBorder.none,
+                                ),
                               ),
-                              controller: searchController,
-                              decoration: InputDecoration(
-                                hintText: 'Search',
-                                contentPadding:
-                                    EdgeInsets.symmetric(horizontal: 16.0),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.search),
-                            onPressed: () {},
+                              suggestionsCallback: (pattern) async {
+                                if (!isTyping || pattern.isEmpty) {
+                                  return [];
+                                }
+                                // Get the current user's ID
+                                String currentUserId = getCurrentUserId();
+
+                                // Reference to the Firestore collections
+                                CollectionReference bookingsCollection =
+                                FirebaseFirestore.instance.collection('bookings');
+                                CollectionReference stationsCollection =
+                                FirebaseFirestore.instance.collection('charging_stations');
+
+                                // Query the Firestore collection based on the search pattern and user's ID
+                                QuerySnapshot querySnapshot = await bookingsCollection
+                                    .where('userId', isEqualTo: currentUserId)
+                                    .get();
+
+                                // Extract the data from the query snapshot
+                                List<String> bookingIds = querySnapshot.docs.map((doc) => doc.id).toList();
+
+                                return bookingIds;
+                              },
+                              itemBuilder: (context, suggestion) {
+                                // Fetch the booking document using the suggestion (bookingId)
+                                return FutureBuilder<DocumentSnapshot>(
+                                  future: bookingsCollection.doc(suggestion).get(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return ListTile(title: Text('Loading...'));
+                                    }
+                                    if (snapshot.hasError) {
+                                      return ListTile(title: Text('Error loading suggestion: ${snapshot.error}'));
+                                    }
+                                    if (!snapshot.hasData || !snapshot.data!.exists) {
+                                      return ListTile(title: Text('Invalid suggestion'));
+                                    }
+
+                                    // Get booking data
+                                    Map<String, dynamic>? bookingData = snapshot.data!.data() as Map<String, dynamic>?;
+
+                                    if (bookingData == null || bookingData.isEmpty) {
+                                      return ListTile(title: Text('No booking data available'));
+                                    }
+
+                                    // Extract stationId from booking data
+                                    String stationId = bookingData['stationId'];
+
+                                    // Fetch the charging station document using stationId
+                                    return FutureBuilder<DocumentSnapshot>(
+                                      future: stationsCollection.doc(stationId).get(),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return ListTile(title: Text('Loading station...'));
+                                        }
+                                        if (snapshot.hasError) {
+                                          return ListTile(title: Text('Error loading station: ${snapshot.error}'));
+                                        }
+                                        if (!snapshot.hasData || !snapshot.data!.exists) {
+                                          return ListTile(title: Text('Invalid station'));
+                                        }
+
+                                        // Get charging station data
+                                        Map<String, dynamic>? stationData = snapshot.data!.data() as Map<String, dynamic>?;
+
+                                        if (stationData == null || stationData.isEmpty) {
+                                          return ListTile(title: Text('No station data available'));
+                                        }
+
+                                        // Extract station name and address
+                                        String stationName = stationData['name'];
+                                        String stationAddress = stationData['address'];
+
+                                        // Build the suggestion item UI
+                                        return ListTile(
+                                          title: Text(stationName),
+                                          subtitle: Text(stationAddress),
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                              onSuggestionSelected: (suggestion) async {
+                                // Navigate to BookingDetailsPage and pass the selected suggestion
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => BookingDetailPage(bookingId: suggestion),
+                                  ),
+                                );
+                              },
+                            )
                           ),
                         ],
                       ),

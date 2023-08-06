@@ -18,6 +18,8 @@ String defaultUrl =
     'https://firebasestorage.googleapis.com/v0/b/evfinder-ad6f0.appspot.com/o/default_avatar.png?alt=media&token=aabd68a9-29ce-4f99-9c7b-7b47fae2070a';
 
 class _ReviewsState extends State<Reviews> {
+  String selectedSortOption = 'Newest';
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -31,27 +33,61 @@ class _ReviewsState extends State<Reviews> {
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No reviews available'));
+          return Center(child: Text(
+              'No reviews available',
+                  style: SafeGoogleFont(
+                    'Lato',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+          ));
         }
 
+        // Convert query snapshot to a list of Review objects
         List<Review> reviewList = snapshot.data!.docs
             .map((doc) => Review.fromMap(doc.data() as Map<String, dynamic>))
             .toList();
 
+        // Sort the reviewList based on the selected sorting option
+        if (selectedSortOption == 'Newest') {
+          reviewList.sort((a, b) => b.timestamp!.compareTo(a.timestamp!));
+        } else if (selectedSortOption == 'Star Rating') {
+          reviewList.sort((a, b) => b.rating!.compareTo(a.rating!));
+        }
+
+
         return Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.only(left: 16, right: 16,bottom: 16,top: 0),
           child: Column(
             children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: Text(
-                  "Rating & Review",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Rating & Review",
+                    style: SafeGoogleFont(
+                      'Lato',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
                   ),
-                ),
+                  // Add the sorting dropdown button
+                  DropdownButton<String>(
+                    value: selectedSortOption,
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedSortOption = newValue!;
+                      });
+                    },
+                    items: <String>['Newest', 'Star Rating'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
               SizedBox(height: 16),
               _buildOverallRating(reviewList),
