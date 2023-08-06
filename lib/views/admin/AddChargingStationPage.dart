@@ -439,6 +439,26 @@ class _AddChargingStationPageState extends State<AddChargingStationPage> {
                         },
                       ),
                       SizedBox(height: 10.0),
+                      Container(
+                        height: 200,
+                        child: GridView.builder(
+                          itemCount: _selectedImages.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisSpacing: 10.0, // Space between columns
+                            mainAxisSpacing: 10.0,
+                            crossAxisCount: 4, // Adjust the number of columns as needed
+                          ),
+                          itemBuilder: (context, index) {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(10.0),
+                                child: Image.file(
+                                    File(_selectedImages[index].path),
+                                  fit: BoxFit.cover,
+                                ),
+                            );
+                          },
+                        ),
+                      ),
                       ElevatedButton(
                         onPressed: _selectImages,
                         child: Text('Upload Photos (Max 4)'),

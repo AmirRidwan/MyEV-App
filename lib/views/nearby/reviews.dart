@@ -83,7 +83,10 @@ class _ReviewsState extends State<Reviews> {
                     items: <String>['Newest', 'Star Rating'].map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value),
+                        child: Text(
+                            value,
+                          style: SafeGoogleFont("Lato"),
+                        ),
                       );
                     }).toList(),
                   ),
@@ -151,7 +154,10 @@ class _ReviewsState extends State<Reviews> {
                 ),
               ),
               SizedBox(width: 8),
-              Text('${ratingCount.count}'),
+              Text(
+                  '${ratingCount.count}',
+                style: SafeGoogleFont("Lato"),
+              ),
             ],
           );
         }).toList(),
@@ -161,12 +167,12 @@ class _ReviewsState extends State<Reviews> {
           children: [
             Text(
               '${overallRating.toStringAsFixed(1)} out of 5',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: SafeGoogleFont("Lato",fontSize: 16, fontWeight: FontWeight.bold),
             ),
             SizedBox(width: 8),
             Text(
               '${reviewList.length} ${reviewList.length == 1 ? 'Review' : 'Reviews'}', // Display the total reviews
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: SafeGoogleFont("Lato",fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ],
         ),

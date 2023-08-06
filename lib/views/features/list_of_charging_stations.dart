@@ -204,12 +204,8 @@ class _ListOfChargingStationsState extends State<ListOfChargingStations> {
                         child: Text('Type 2'),
                       ),
                       DropdownMenuItem<String>(
-                        value: 'CHAdeMO',
-                        child: Text('CHAdeMO'),
-                      ),
-                      DropdownMenuItem<String>(
-                        value: 'Supercharger',
-                        child: Text('Supercharger'),
+                        value: 'DC Fast Charging',
+                        child: Text('DC Fast Charging'),
                       ),
                     ],
                   ),

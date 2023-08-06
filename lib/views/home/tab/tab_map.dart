@@ -42,12 +42,27 @@ class _MapPageState extends State<MapPage> {
     addCustomIcon();
     addCustomCarIcon();
     _getCurrentLocation();
+    _fetchChargingStations();
   }
 
   @override
   void dispose() {
     _chargingStationsSubscription?.cancel();
     super.dispose();
+  }
+
+  void _fetchChargingStations() {
+    FirebaseFirestore.instance
+        .collection('charging_stations')
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      setState(() {
+        _chargingStations = querySnapshot.docs; // Populate charging stations
+        _sortAndUpdateMarkers();
+      });
+    }).catchError((error) {
+      print("Error fetching charging stations: $error");
+    });
   }
 
   // Helper function to calculate the distance.
@@ -71,21 +86,6 @@ class _MapPageState extends State<MapPage> {
   // Helper function to convert degrees to radians.
   double _degreesToRadians(double degrees) {
     return degrees * (pi / 180);
-  }
-
-  void _fetchChargingStations() {
-    _chargingStationsSubscription = FirebaseFirestore.instance
-        .collection('charging_stations')
-        .snapshots()
-        .listen((QuerySnapshot snapshot) {
-      setState(() {
-        _chargingStations = snapshot.docs;
-        _sortAndUpdateMarkers();
-      });
-    });
-
-    // Call _sortAndUpdateMarkers() immediately after setting the subscription
-    _sortAndUpdateMarkers();
   }
 
   void _sortAndUpdateMarkers() {
@@ -183,8 +183,7 @@ class _MapPageState extends State<MapPage> {
   List<LatLng> _polylineCoordinates = []; // Add this line to declare _polylineCoordinates
 
   void _updateMarkers() {
-    List<DocumentSnapshot> filteredStations =
-        _chargingStations.where((station) {
+    List<DocumentSnapshot> filteredStations = _chargingStations.where((station) {
       String chargerType = station['chargerType'].toString();
       String chargingSpeed = station['chargingSpeed'].toString();
 
@@ -202,9 +201,8 @@ class _MapPageState extends State<MapPage> {
     }).toList();
 
     setState(() {
-      _filteredMarkers = _buildMarkersFromStations(filteredStations);
-      _filteredChargingStations =
-          filteredStations; // Update the filtered charging stations list
+      _filteredChargingStations = filteredStations;
+      _filteredMarkers = _buildMarkersFromStations(_filteredChargingStations);
     });
   }
 
@@ -621,7 +619,7 @@ class _MapPageState extends State<MapPage> {
                     scrollDirection: Axis.horizontal,
                     itemCount: _filteredChargingStations.length,
                     itemBuilder: (BuildContext context, int index) {
-                      DocumentSnapshot station = _chargingStations[index];
+                      DocumentSnapshot station = _filteredChargingStations[index];
                       bool availability = station['availability'];
                       String chargerType = station['chargerType'];
                       String chargingSpeed = station['chargingSpeed'];

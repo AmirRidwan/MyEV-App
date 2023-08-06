@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 class Constant {
   static String assetImagePath = "assets/images/";
   static bool isDriverApp = false;
-  static const String fontsFamily = "Inter";
+  static const String fontsFamily = "Lato";
   static const String fromLogin = "getFromLoginClick";
   static const String homePos = "getTabPos";
   static const int stepStatusNone = 0;
