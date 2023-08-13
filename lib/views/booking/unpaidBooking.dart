@@ -293,229 +293,234 @@ class _unpaidBookingState extends State<unpaidBooking> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Container(
-                      height: 240,
-                      width: MediaQuery.of(context).size.width,
-                      child: Row(
-                        children: [
-                          SizedBox(width: 5),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 200,
+                          width: MediaQuery.of(context).size.width,
+                          child: Row(
                             children: [
-                              Text(
-                                '${DateFormat('MMM').format(booking['selectedDate'])}',
-                                style: SafeGoogleFont('Lato', fontSize: 14),
+                              SizedBox(width: 5),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    '${DateFormat('MMM').format(booking['selectedDate'])}',
+                                    style: SafeGoogleFont('Lato', fontSize: 14),
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    '${DateFormat('dd').format(booking['selectedDate'])}',
+                                    style: SafeGoogleFont('Lato', fontSize: 14, fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    '${DateFormat('E').format(booking['selectedDate'])}',
+                                    style: SafeGoogleFont('Lato', fontSize: 14),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: 2),
-                              Text(
-                                '${DateFormat('dd').format(booking['selectedDate'])}',
-                                style: SafeGoogleFont('Lato', fontSize: 14, fontWeight: FontWeight.bold),
+                              SizedBox(width: 10),
+                              VerticalDivider(
+                                color: Colors.grey[350],
+                                width: 24,
+                                thickness: 1,
+                                indent: 36,
+                                endIndent: 36,
                               ),
-                              SizedBox(height: 2),
-                              Text(
-                                '${DateFormat('E').format(booking['selectedDate'])}',
-                                style: SafeGoogleFont('Lato', fontSize: 14),
+                              SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Center(
+                                    child: Text(
+                                      '${chargingStationName ?? 'N/A'}',
+                                      style: SafeGoogleFont(
+                                        'Lato',
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Container(
+                                    width: 260,
+                                    child: Expanded(
+                                      child: Text(
+                                        '${chargingStationAddress ?? 'N/A'}',
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 14,
+                                          color: Colors.black54,
+                                        ),
+                                        softWrap: true,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.access_time,
+                                        color: Colors.grey,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        '${booking['startTime']} - ${booking['endTime']}',
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 14,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.hourglass_bottom,
+                                        color: Colors.grey,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        '${booking['hoursOfCharge']} hours',
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 14,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.payment,
+                                        color: Colors.grey,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        ' ${booking['paymentMethod']}',
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 14,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.assignment_turned_in_outlined,
+                                        color: Colors.grey,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        'Status: ',
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 14,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${booking['bookingStatus']}',
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 14,
+                                          color: statusColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.monetization_on_outlined,
+                                        color: Colors.black,
+                                        size: 20,
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        'RM${booking['totalAmount'].toStringAsFixed(2)}',
+                                        style: SafeGoogleFont(
+                                          'Lato',
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 8),
+                                ],
                               ),
                             ],
                           ),
-                          SizedBox(width: 10),
-                          VerticalDivider(
-                            color: Colors.grey[350],
-                            width: 24,
-                            thickness: 1,
-                            indent: 36,
-                            endIndent: 36,
-                          ),
-                          SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Center(
-                                child: Text(
-                                  '${chargingStationName ?? 'N/A'}',
-                                  style: SafeGoogleFont(
-                                    'Lato',
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            // Add "Make Payment" button if the booking is unpaid
+                            if (booking['bookingStatus'].toLowerCase() != 'paid')
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Color(0xff2d366f),
                                   ),
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              Container(
-                                width: 260,
-                                child: Expanded(
+                                  onPressed: () {
+                                    _showPaymentConfirmationDialog(booking['bookingId']);
+                                  },
                                   child: Text(
-                                    '${chargingStationAddress ?? 'N/A'}',
+                                    'Continue Payment',
                                     style: SafeGoogleFont(
                                       'Lato',
-                                      fontSize: 14,
-                                      color: Colors.black54,
+                                      fontSize:  14,
+                                      fontWeight:  FontWeight.bold,
+                                      color:  Colors.white,
                                     ),
-                                    softWrap: true,
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.access_time,
-                                    color: Colors.grey,
-                                    size: 20,
+                            SizedBox(width: 10),
+                            // Add "Cancel Booking" button if the booking is unpaid
+                            if (booking['bookingStatus'].toLowerCase() != 'paid')
+                              Align(
+                                alignment: Alignment.bottomRight,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Color(0xFFC62828), // Use your desired color
                                   ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    '${booking['startTime']} - ${booking['endTime']}',
-                                    style: SafeGoogleFont(
-                                      'Lato',
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.hourglass_bottom,
-                                    color: Colors.grey,
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    '${booking['hoursOfCharge']} hours',
-                                    style: SafeGoogleFont(
-                                      'Lato',
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.payment,
-                                    color: Colors.grey,
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    ' ${booking['paymentMethod']}',
-                                    style: SafeGoogleFont(
-                                      'Lato',
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.assignment_turned_in_outlined,
-                                    color: Colors.grey,
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    'Status: ',
-                                    style: SafeGoogleFont(
-                                      'Lato',
-                                      fontSize: 14,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${booking['bookingStatus']}',
-                                    style: SafeGoogleFont(
-                                      'Lato',
-                                      fontSize: 14,
-                                      color: statusColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.monetization_on_outlined,
-                                    color: Colors.black,
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    'RM${booking['totalAmount'].toStringAsFixed(2)}',
+                                  onPressed: () {
+                                    _showCancelConfirmationDialog(booking['bookingId']);
+                                  },
+                                  child: Text(
+                                    'Cancel Booking',
                                     style: SafeGoogleFont(
                                       'Lato',
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                              SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  // Add "Make Payment" button if the booking is unpaid
-                                  if (booking['bookingStatus'].toLowerCase() != 'paid')
-                                    Align(
-                                      alignment: Alignment.bottomRight,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          primary: Color(0xff2d366f),
-                                        ),
-                                        onPressed: () {
-                                          _showPaymentConfirmationDialog(booking['bookingId']);
-                                        },
-                                        child: Text(
-                                          'Continue Payment',
-                                          style: SafeGoogleFont(
-                                            'Lato',
-                                            fontSize:  16,
-                                            fontWeight:  FontWeight.bold,
-                                            color:  Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  SizedBox(width: 10),
-                                  // Add "Cancel Booking" button if the booking is unpaid
-                                  if (booking['bookingStatus'].toLowerCase() != 'paid')
-                                    Align(
-                                      alignment: Alignment.bottomRight,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          primary: Color(0xFFC62828), // Use your desired color
-                                        ),
-                                        onPressed: () {
-                                          _showCancelConfirmationDialog(booking['bookingId']);
-                                        },
-                                        child: Text(
-                                          'Cancel Booking',
-                                          style: SafeGoogleFont(
-                                            'Lato',
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
